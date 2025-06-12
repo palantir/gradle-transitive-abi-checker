@@ -1,0 +1,18 @@
+com.fasterxml.jackson.*:* = 2.18.3
+com.github.ben-manes.caffeine:caffeine = 3.2.1
+com.google.guava:guava = 33.4.8-jre
+org.ow2.asm:asm-tree = 9.8
+org.immutables:* = 2.10.1
+
+# Tests
+com.google.testing.compile:compile-testing = 0.21.0
+com.netflix.nebula:nebula-test = 10.6.2
+org.junit:* = 5.13.1
+org.junit.jupiter:* = 5.13.1
+org.junit.platform:* = 1.13.1
+org.assertj:assertj-core = 3.27.3
+
+# conflict resolution
+com.google.code.findbugs:jsr305 = 3.0.2
+com.google.errorprone:error_prone_annotations = 2.11.0
+org.checkerframework:checker-qual = 3.49.4

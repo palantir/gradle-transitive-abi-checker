@@ -1,0 +1,23 @@
+apply plugin: 'java-library'
+apply plugin: 'com.palantir.external-publish-jar'
+
+dependencies {
+    implementation 'org.ow2.asm:asm'
+    implementation 'org.ow2.asm:asm-tree'
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'com.github.ben-manes.caffeine:caffeine'
+    implementation 'com.google.guava:guava'
+    implementation 'com.google.code.findbugs:jsr305'
+
+    annotationProcessor 'org.immutables:value'
+    compileOnly 'org.immutables:value::annotations'
+
+    testImplementation 'com.google.testing.compile:compile-testing'
+    testImplementation platform('org.junit:junit-bom')
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
+    testImplementation 'org.assertj:assertj-core'
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+
+    testAnnotationProcessor 'org.immutables:value'
+    testCompileOnly 'org.immutables:value::annotations'
+}

@@ -1,0 +1,41 @@
+apply plugin: 'groovy'
+apply plugin: 'java-gradle-plugin'
+apply plugin: 'com.palantir.external-publish-jar'
+apply plugin: 'com.palantir.external-publish-gradle-plugin'
+apply plugin: 'com.palantir.gradle-plugin-testing'
+
+dependencies {
+    compileOnly gradleApi()
+
+    implementation project(':abi-check-core')
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'com.google.guava:guava'
+
+    annotationProcessor 'org.immutables:value'
+    compileOnly 'org.immutables:value::annotations'
+
+    testImplementation gradleTestKit()
+    testImplementation 'com.netflix.nebula:nebula-test'
+}
+
+// generate plugin test files when generating Eclipse projects
+tasks.eclipse.dependsOn pluginUnderTestMetadata
+
+gradlePlugin {
+    website = 'https://github.com/palantir/gradle-transitive-abi-checker'
+    vcsUrl = 'https://github.com/palantir/gradle-transitive-abi-checker'
+
+    plugins {
+        transitiveAbiChecker {
+            id = 'com.palantir.transitive-abi-checker'
+            displayName = 'Transitive ABI Checker'
+            description = 'Analyse transitive dependencies for ABI compatibility'
+            tags = ['abi-checker']
+            implementationClass = 'com.palantir.gradle.abi.checker.TransitiveAbiCheckerRootPlugin'
+        }
+    }
+}
+
+gradleTestUtils {
+    gradleVersions = ['7.6.5', '8.14.2']
+}

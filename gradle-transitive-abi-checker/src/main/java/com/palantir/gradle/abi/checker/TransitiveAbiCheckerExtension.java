@@ -1,0 +1,85 @@
+/*
+ * (c) Copyright 2025 Palantir Technologies Inc. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.palantir.gradle.abi.checker;
+
+import com.palantir.abi.checker.ConflictCheckerConfiguration;
+import java.util.Set;
+import org.gradle.api.provider.Property;
+import org.gradle.api.provider.SetProperty;
+import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.Optional;
+
+public abstract class TransitiveAbiCheckerExtension {
+
+    /**
+     * Used for prefix matching artifacts to promote to an error when a conflict is discovered.
+     * <p>
+     * Specificity can be dialed up to a fully qualified Maven coordinate.
+     * <p>
+     * Note: If an artifact matches this configuration and the {@link #getIgnoredArtifactPrefixes()} configuration, then
+     * the ignored setting wins. The reasoning being that enablement is likely wide while ignoring is likely targeted.
+     */
+    @Optional
+    @Input
+    public abstract SetProperty<String> getErrorArtifactPrefixes();
+
+    /**
+     * Used for prefix matching artifacts to ignore.
+     * <p>
+     * Specificity can be dialed up to a fully qualified Maven coordinate.
+     * <p>
+     * Note: If an artifact matches this configuration and the {@link #getErrorArtifactPrefixes()} configuration, then
+     * this setting wins. The reasoning being that enablement is likely wide while ignoring is likely targeted.
+     */
+    @Input
+    public abstract SetProperty<String> getIgnoredArtifactPrefixes();
+
+    /**
+     * Used for prefix matching on classes to ignore.
+     */
+    @Input
+    public abstract SetProperty<String> getIgnoredClassPrefixes();
+
+    /**
+     * Used to match classnames by case-insensitive keyword and ignore matches.
+     */
+    @Input
+    public abstract SetProperty<String> getIgnoredClassnameKeywords();
+
+    /**
+     * Signals to the checker to ignore the current modules "entry point classes" and instead "completely check"
+     * all artifacts that match the above filtering.
+     */
+    @Optional
+    @Input
+    public abstract Property<Boolean> getCheckCompletely();
+
+    public TransitiveAbiCheckerExtension() {
+        // This is the default anyway, but making it extra clear that this is intended
+        getCheckCompletely().convention(false);
+    }
+
+    public final ConflictCheckerConfiguration toConfiguration() {
+        return ConflictCheckerConfiguration.builder()
+                .errorArtifactPrefixes(getErrorArtifactPrefixes().getOrElse(Set.of()))
+                .ignoredArtifactPrefixes(getIgnoredArtifactPrefixes().getOrElse(Set.of()))
+                .ignoredClassPrefixes(getIgnoredClassPrefixes().getOrElse(Set.of()))
+                .ignoredClassnameKeywords(getIgnoredClassnameKeywords().getOrElse(Set.of()))
+                .checkCompletely(getCheckCompletely().getOrElse(false))
+                .build();
+    }
+}
