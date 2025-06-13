@@ -161,8 +161,8 @@ public final class AbiCheckerClassLoader {
         int lineNumber = 0;
         for (final AbstractInsnNode insn : method.instructions) {
             try {
-                if (insn instanceof LineNumberNode) {
-                    lineNumber = ((LineNumberNode) insn).line;
+                if (insn instanceof LineNumberNode lineNumberNode) {
+                    lineNumber = lineNumberNode.line;
                 }
                 if (insn instanceof MethodInsnNode methodInsn) {
                     handleMethodCall(
@@ -186,8 +186,8 @@ public final class AbiCheckerClassLoader {
                             dynamicInsn,
                             () -> getCaughtExceptions(method.instructions, dynamicInsn, method));
                 }
-                if (insn instanceof LdcInsnNode) {
-                    handleLdc(loadedClasses, (LdcInsnNode) insn);
+                if (insn instanceof LdcInsnNode ldcInsnNode) {
+                    handleLdc(loadedClasses, ldcInsnNode);
                 }
             } catch (Exception e) {
                 throw new IllegalStateException(

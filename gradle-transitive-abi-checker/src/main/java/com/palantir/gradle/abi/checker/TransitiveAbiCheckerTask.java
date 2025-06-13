@@ -113,8 +113,8 @@ public abstract class TransitiveAbiCheckerTask extends DefaultTask {
         } catch (Exception e) {
             final OutputContents outputContents;
 
-            if (e instanceof ConflictException) {
-                outputContents = ConflictsOutputContents.of(((ConflictException) e).getConflicts());
+            if (e instanceof ConflictException conflictException) {
+                outputContents = ConflictsOutputContents.of(conflictException.getConflicts());
             } else {
                 // See comment in UnexpectedFailureOutputContents for why we're outputting non-conflict failures too
                 outputContents = UnexpectedFailureOutputContents.of(e);

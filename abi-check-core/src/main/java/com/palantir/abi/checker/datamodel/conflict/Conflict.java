@@ -53,6 +53,7 @@ public interface Conflict {
 
     ConflictCategory category();
 
+    @SuppressWarnings("for-rollout:StatementSwitchToExpressionSwitch")
     @JsonIgnore
     @Value.Derived
     default String reason() {
