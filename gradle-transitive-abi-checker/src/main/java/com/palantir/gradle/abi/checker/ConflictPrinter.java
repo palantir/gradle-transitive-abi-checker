@@ -187,6 +187,8 @@ public final class ConflictPrinter {
 
             String indentReason = indentPrefix + "  " + indentCharSubItems(isLastReason);
 
+            // Just look at the first conflict since they should all have the same target/from classes at this point.
+            // If these are the same, hint to user that it was likely due to a break in a super class/interface
             Conflict firstConflict = conflictsForReason.get(0);
             if (firstConflict
                     .dependency()
