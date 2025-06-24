@@ -88,13 +88,34 @@ public final class ConflictPrinter {
             }
             sb.append("\t" + dependency);
             if (knownBrokenTransitives.size() == 1) {
-                sb.append(" with " + knownBrokenTransitives.get(0));
+                String transitive = knownBrokenTransitives.get(0);
+                sb.append(" with " + transitive);
+                if (transitive.equals(dependency)) {
+                    sb.append("\n\t\t-> " + selfDependencyHint(dependency));
+                }
             } else {
-                sb.append(" with:\n");
-                knownBrokenTransitives.forEach(transitive -> sb.append("\t\t" + transitive));
+                sb.append(" with:");
+                knownBrokenTransitives.forEach(transitive -> {
+                    sb.append("\n\t\t" + transitive);
+
+                    if (transitive.equals(dependency)) {
+                        sb.append("\n\t\t\t-> " + selfDependencyHint(dependency));
+                    }
+                });
             }
+
             sb.append("\n\n");
         });
+    }
+
+    /**
+     * If we have a conflict where the target dependency is the same as the one with the break, this likely means
+     *   that e.g. a method/field in a super class was removed (there may be other cases though).
+     */
+    private static String selfDependencyHint(String dependency) {
+        return "This generally indicates a class in " + dependency
+                + " inherited from a super class from another library, which had an ABI break, "
+                + "but we cannot determine which one.";
     }
 
     /**
@@ -165,6 +186,15 @@ public final class ConflictPrinter {
             sb.append(indentPrefix + "  " + indentCharItem(isLastReason) + "- " + reason + "\n");
 
             String indentReason = indentPrefix + "  " + indentCharSubItems(isLastReason);
+
+            Conflict firstConflict = conflictsForReason.get(0);
+            if (firstConflict
+                    .dependency()
+                    .targetClass()
+                    .equals(firstConflict.dependency().fromClass())) {
+                sb.append(indentReason + "  |  * "
+                        + "It was likely coming from a super class/interface provided by another library.\n");
+            }
 
             outputCallsitesForConflictReasons(sb, indentReason, conflictsForReason);
         });
