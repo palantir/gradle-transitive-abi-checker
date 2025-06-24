@@ -115,7 +115,7 @@ public final class ConflictPrinter {
     private static String selfDependencyHint(String dependency) {
         return "This generally indicates a class in " + dependency
                 + " inherited from a super class from another library, which had an ABI break, "
-                + "but we cannot determine which one.";
+                + "but there is insufficient information to determine the root dependency.";
     }
 
     /**
