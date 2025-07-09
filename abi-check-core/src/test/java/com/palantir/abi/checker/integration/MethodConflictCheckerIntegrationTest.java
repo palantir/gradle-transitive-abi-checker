@@ -1224,6 +1224,96 @@ public class MethodConflictCheckerIntegrationTest extends BaseConflictCheckerInt
         assertNoConflicts(tempDir);
     }
 
+    @Test
+    public void adding_method_on_parent_interface_does_not_conflict() {
+        JavaFiles.Builder sources = JavaFiles.builder();
+        sources.reachableDependency(
+                "com.MyClass",
+                // language=java
+                """
+                package com;
+                public class MyClass implements ParentInterface {
+                    public MyClass() {
+                        method();
+                    }
+
+                    public void method() {
+                        System.out.println("method called");
+                    }
+                }
+                """);
+
+        sources.transitiveBeforeDependency(
+                "com.ParentInterface",
+                // language=java
+                """
+                package com;
+                public interface ParentInterface {
+                    void method();
+                }
+                """);
+
+        sources.transitiveAfterDependency(
+                "com.ParentInterface",
+                // language=java
+                """
+                package com;
+                public interface ParentInterface {
+                    void method();
+                    void newMethod();
+                }
+                """);
+
+        generateClassFiles(tempDir, sources.build());
+
+        assertNoConflicts(tempDir);
+    }
+
+    @Test
+    public void adding_abstract_method_on_parent_class_does_not_conflict() {
+        JavaFiles.Builder sources = JavaFiles.builder();
+        sources.reachableDependency(
+                "com.MyClass",
+                // language=java
+                """
+                package com;
+                public class MyClass extends ParentClass {
+                    public MyClass() {
+                        method();
+                    }
+
+                    public void method() {
+                        System.out.println("method called");
+                    }
+                }
+                """);
+
+        sources.transitiveBeforeDependency(
+                "com.ParentClass",
+                // language=java
+                """
+                package com;
+                public abstract class ParentClass {
+                    abstract void method();
+                }
+                """);
+
+        sources.transitiveAfterDependency(
+                "com.ParentClass",
+                // language=java
+                """
+                package com;
+                public abstract class ParentClass {
+                    abstract void method();
+                    abstract void newMethod();
+                }
+                """);
+
+        generateClassFiles(tempDir, sources.build());
+
+        assertNoConflicts(tempDir);
+    }
+
     private static void assertThatMethodNotFound(
             Path baseDir,
             String fromClass,
