@@ -40,6 +40,7 @@ import com.palantir.abi.checker.datamodel.classlocation.JdkBasedClassLocation;
 import com.palantir.abi.checker.datamodel.types.ClassTypeDescriptor;
 import com.palantir.abi.checker.datamodel.types.TypeDescriptors;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.lang.module.ModuleDescriptor;
 import java.lang.module.ModuleFinder;
 import java.lang.module.ModuleReader;
@@ -62,7 +63,6 @@ public final class JdkModuleLoader {
                 artifacts -> artifacts == null ? getJavaModuleArtifactsInternal() : artifacts);
     }
 
-    @SuppressWarnings("for-rollout:PreferUncheckedIoException")
     private List<Artifact> getJavaModuleArtifactsInternal() {
         ImmutableList.Builder<Artifact> artifactBuilder = ImmutableList.builder();
         ModuleFinder systemModuleFinder = ModuleFinder.ofSystem();
@@ -96,7 +96,7 @@ public final class JdkModuleLoader {
                 artifactBuilder.add(
                         Artifact.builder().name(name).classes(classes).build());
             } catch (IOException e) {
-                throw new RuntimeException("Failed to read module " + moduleName, e);
+                throw new UncheckedIOException("Failed to read module " + moduleName, e);
             }
         }
 

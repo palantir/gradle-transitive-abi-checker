@@ -33,6 +33,7 @@
 package com.palantir.abi.checker;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -42,7 +43,6 @@ import java.util.stream.Stream;
 
 final class FilePathHelper {
 
-    @SuppressWarnings("for-rollout:PreferUncheckedIoException")
     static Path getPath(String pathRelativeToProject) {
         BiPredicate<Path, BasicFileAttributes> buildFilePredicate =
                 (path, _attr) -> path.toString().contains(pathRelativeToProject);
@@ -51,7 +51,7 @@ final class FilePathHelper {
                     .findFirst()
                     .orElseThrow(() -> new RuntimeException("Unable to locate classes in " + pathRelativeToProject));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
     }
 

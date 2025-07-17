@@ -32,6 +32,7 @@ import com.palantir.abi.checker.datamodel.ArtifactName;
 import com.palantir.abi.checker.datamodel.conflict.Conflict;
 import com.palantir.abi.checker.datamodel.method.MethodDescriptor;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -104,7 +105,6 @@ abstract class BaseConflictCheckerIntegrationTest {
      * Specifically, it will load and instantiate each class in the root directory, assuming they each have
      *   no-argument constructors.
      */
-    @SuppressWarnings("for-rollout:PreferUncheckedIoException")
     protected static void runClassFiles(Path baseDir)
             throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         Path rootDirectory = target(baseDir, ROOT);
@@ -128,14 +128,13 @@ abstract class BaseConflictCheckerIntegrationTest {
                 }
             }
         } catch (IOException e) {
-            throw new RuntimeException("Failed to load classes from " + rootDirectory, e);
+            throw new UncheckedIOException("Failed to load classes from " + rootDirectory, e);
         }
     }
 
     /**
      * Returns all the class files in the provided directory, using paths relative to it.
      */
-    @SuppressWarnings("for-rollout:PreferUncheckedIoException")
     private static List<Path> classFiles(Path directory) {
         try (Stream<Path> fileStream = Files.walk(directory)) {
 
@@ -145,7 +144,7 @@ abstract class BaseConflictCheckerIntegrationTest {
                     .map(directory::relativize)
                     .toList();
         } catch (IOException e) {
-            throw new RuntimeException("Failed to load classes from " + directory, e);
+            throw new UncheckedIOException("Failed to load classes from " + directory, e);
         }
     }
 
@@ -184,13 +183,12 @@ abstract class BaseConflictCheckerIntegrationTest {
         return baseDir.resolve(type);
     }
 
-    @SuppressWarnings("for-rollout:PreferUncheckedIoException")
     private static void copyClassFiles(Compilation compilation, Path targetDir, Set<JavaFileObject> sources) {
         sources.forEach(source -> {
             try {
                 copyClassFile(compilation, targetDir, source);
             } catch (IOException e) {
-                throw new RuntimeException("Unable to copy class file " + source.getName(), e);
+                throw new UncheckedIOException("Unable to copy class file " + source.getName(), e);
             }
         });
     }

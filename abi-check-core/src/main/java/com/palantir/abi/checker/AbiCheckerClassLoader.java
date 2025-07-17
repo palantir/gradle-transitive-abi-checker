@@ -47,6 +47,7 @@ import com.palantir.abi.checker.datamodel.types.ClassTypeDescriptor;
 import com.palantir.abi.checker.datamodel.types.TypeDescriptors;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -80,14 +81,13 @@ public final class AbiCheckerClassLoader {
             new HashSet<>(Arrays.asList("java/lang/invoke/MethodHandle", "java/lang/invoke/VarHandle"));
 
     // Note: URL#equals does DNS resolution, so we shouldn't use it here
-    @SuppressWarnings("for-rollout:PreferUncheckedIoException")
     private final LoadingCache<ClassLocation, DeclaredClass> cache = Caffeine.newBuilder()
             .maximumSize(10_000)
             .build(location -> {
                 try (InputStream classInputStream = location.openStream()) {
                     return loadInternal(classInputStream);
                 } catch (IOException e) {
-                    throw new RuntimeException("Failed to parse class: " + location, e);
+                    throw new UncheckedIOException("Failed to parse class: " + location, e);
                 }
             });
 
