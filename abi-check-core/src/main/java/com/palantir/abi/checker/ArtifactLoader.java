@@ -44,6 +44,7 @@ import com.palantir.abi.checker.datamodel.types.ClassTypeDescriptor;
 import com.palantir.abi.checker.datamodel.types.TypeDescriptors;
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -76,7 +77,6 @@ public final class ArtifactLoader {
         return classes == null ? Collections.emptyMap() : classes;
     }
 
-    @SuppressWarnings("for-rollout:PreferUncheckedIoException")
     private Map<ClassTypeDescriptor, ClassLocation> loadClassesInternal(Path location) {
         File classesLocation = location.toFile();
 
@@ -97,7 +97,7 @@ public final class ArtifactLoader {
                 return Collections.emptyMap();
             }
         } catch (IOException e) {
-            throw new RuntimeException("Failed to load artifact located at: " + classesLocation, e);
+            throw new UncheckedIOException("Failed to load artifact located at: " + classesLocation, e);
         }
     }
 

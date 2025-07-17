@@ -42,6 +42,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -68,7 +69,6 @@ public class AbiCheckerClassLoaderTest {
         }
     }
 
-    @SuppressWarnings("for-rollout:PreferUncheckedIoException")
     @Test
     public void testLoadJdk() {
         List<Artifact> artifacts = new JdkModuleLoader().getJavaModuleArtifacts();
@@ -88,7 +88,7 @@ public class AbiCheckerClassLoaderTest {
                                 .isNotEmpty();
                     }
                 } catch (IOException e) {
-                    throw new RuntimeException("Failed to parse class: " + classLocation, e);
+                    throw new UncheckedIOException("Failed to parse class: " + classLocation, e);
                 }
             });
         }

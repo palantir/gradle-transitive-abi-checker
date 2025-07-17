@@ -33,6 +33,7 @@ import com.palantir.gradle.abi.checker.services.AbiCheckerBuildService;
 import com.palantir.gradle.abi.checker.util.ResolvedArtifactDefinition;
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -124,8 +125,8 @@ public abstract class TransitiveAbiCheckerTask extends DefaultTask {
                 overwriteFile(
                         getErrorsOutputFile().get().getAsFile().toPath(), MAPPER.writeValueAsString(outputContents));
             } catch (JsonProcessingException ex) {
-                @SuppressWarnings("for-rollout:PreferUncheckedIoException")
-                RuntimeException jsonException = new RuntimeException("Failed to write exception to output file", ex);
+                RuntimeException jsonException =
+                        new UncheckedIOException("Failed to write exception to output file", ex);
                 jsonException.addSuppressed(e);
 
                 throw jsonException;
@@ -229,14 +230,13 @@ public abstract class TransitiveAbiCheckerTask extends DefaultTask {
                 .collect(Collectors.toList());
     }
 
-    @SuppressWarnings("for-rollout:PreferUncheckedIoException")
     private static void overwriteFile(Path file, String content) {
         try {
             Files.createDirectories(file.getParent());
 
             Files.writeString(file, content, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         } catch (IOException e) {
-            throw new RuntimeException("Error writing contents to file " + file, e);
+            throw new UncheckedIOException("Error writing contents to file " + file, e);
         }
     }
 }
