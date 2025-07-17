@@ -104,6 +104,7 @@ abstract class BaseConflictCheckerIntegrationTest {
      * Specifically, it will load and instantiate each class in the root directory, assuming they each have
      *   no-argument constructors.
      */
+    @SuppressWarnings("for-rollout:PreferUncheckedIoException")
     protected static void runClassFiles(Path baseDir)
             throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         Path rootDirectory = target(baseDir, ROOT);
@@ -134,6 +135,7 @@ abstract class BaseConflictCheckerIntegrationTest {
     /**
      * Returns all the class files in the provided directory, using paths relative to it.
      */
+    @SuppressWarnings("for-rollout:PreferUncheckedIoException")
     private static List<Path> classFiles(Path directory) {
         try (Stream<Path> fileStream = Files.walk(directory)) {
 
@@ -182,6 +184,7 @@ abstract class BaseConflictCheckerIntegrationTest {
         return baseDir.resolve(type);
     }
 
+    @SuppressWarnings("for-rollout:PreferUncheckedIoException")
     private static void copyClassFiles(Compilation compilation, Path targetDir, Set<JavaFileObject> sources) {
         sources.forEach(source -> {
             try {

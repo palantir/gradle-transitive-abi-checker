@@ -124,6 +124,7 @@ public abstract class TransitiveAbiCheckerTask extends DefaultTask {
                 overwriteFile(
                         getErrorsOutputFile().get().getAsFile().toPath(), MAPPER.writeValueAsString(outputContents));
             } catch (JsonProcessingException ex) {
+                @SuppressWarnings("for-rollout:PreferUncheckedIoException")
                 RuntimeException jsonException = new RuntimeException("Failed to write exception to output file", ex);
                 jsonException.addSuppressed(e);
 
@@ -228,6 +229,7 @@ public abstract class TransitiveAbiCheckerTask extends DefaultTask {
                 .collect(Collectors.toList());
     }
 
+    @SuppressWarnings("for-rollout:PreferUncheckedIoException")
     private static void overwriteFile(Path file, String content) {
         try {
             Files.createDirectories(file.getParent());

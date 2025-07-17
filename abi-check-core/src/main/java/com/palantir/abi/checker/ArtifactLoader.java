@@ -76,6 +76,7 @@ public final class ArtifactLoader {
         return classes == null ? Collections.emptyMap() : classes;
     }
 
+    @SuppressWarnings("for-rollout:PreferUncheckedIoException")
     private Map<ClassTypeDescriptor, ClassLocation> loadClassesInternal(Path location) {
         File classesLocation = location.toFile();
 
