@@ -68,6 +68,7 @@ public class AbiCheckerClassLoaderTest {
         }
     }
 
+    @SuppressWarnings("for-rollout:PreferUncheckedIoException")
     @Test
     public void testLoadJdk() {
         List<Artifact> artifacts = new JdkModuleLoader().getJavaModuleArtifacts();

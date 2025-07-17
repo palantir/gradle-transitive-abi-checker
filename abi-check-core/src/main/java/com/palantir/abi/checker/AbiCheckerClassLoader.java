@@ -80,6 +80,7 @@ public final class AbiCheckerClassLoader {
             new HashSet<>(Arrays.asList("java/lang/invoke/MethodHandle", "java/lang/invoke/VarHandle"));
 
     // Note: URL#equals does DNS resolution, so we shouldn't use it here
+    @SuppressWarnings("for-rollout:PreferUncheckedIoException")
     private final LoadingCache<ClassLocation, DeclaredClass> cache = Caffeine.newBuilder()
             .maximumSize(10_000)
             .build(location -> {

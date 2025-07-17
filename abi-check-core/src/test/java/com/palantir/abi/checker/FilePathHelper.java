@@ -42,6 +42,7 @@ import java.util.stream.Stream;
 
 final class FilePathHelper {
 
+    @SuppressWarnings("for-rollout:PreferUncheckedIoException")
     static Path getPath(String pathRelativeToProject) {
         BiPredicate<Path, BasicFileAttributes> buildFilePredicate =
                 (path, _attr) -> path.toString().contains(pathRelativeToProject);

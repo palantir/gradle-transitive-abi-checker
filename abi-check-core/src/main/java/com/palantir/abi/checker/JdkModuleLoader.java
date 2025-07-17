@@ -62,6 +62,7 @@ public final class JdkModuleLoader {
                 artifacts -> artifacts == null ? getJavaModuleArtifactsInternal() : artifacts);
     }
 
+    @SuppressWarnings("for-rollout:PreferUncheckedIoException")
     private List<Artifact> getJavaModuleArtifactsInternal() {
         ImmutableList.Builder<Artifact> artifactBuilder = ImmutableList.builder();
         ModuleFinder systemModuleFinder = ModuleFinder.ofSystem();
