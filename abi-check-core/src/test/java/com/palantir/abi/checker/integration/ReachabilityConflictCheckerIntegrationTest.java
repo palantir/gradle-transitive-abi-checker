@@ -19,9 +19,12 @@ package com.palantir.abi.checker.integration;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.palantir.abi.checker.datamodel.conflict.Conflict;
 import com.palantir.abi.checker.datamodel.conflict.Conflict.ConflictCategory;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Path;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -375,5 +378,80 @@ public class ReachabilityConflictCheckerIntegrationTest extends BaseConflictChec
                 .havingCause()
                 .isInstanceOf(NoClassDefFoundError.class)
                 .withMessageContaining("com/Removed");
+    }
+
+    @Test
+    public void classes_are_reachable_through_annotation() {
+        JavaFiles.Builder sources = JavaFiles.builder();
+        sources.reachableDependency(
+                "com.Reachable",
+                // language=java
+                """
+                package com;
+                import com.fasterxml.jackson.databind.ObjectMapper;
+                import com.fasterxml.jackson.core.JsonProcessingException;
+                public class Reachable {
+                    public Reachable () {
+                        try {
+                            ObjectMapper mapper = new ObjectMapper();
+                            // This should be considered as reaching BreakingClass
+                            System.out.println(mapper.writeValueAsString(new BreakingClass()));
+                        } catch (JsonProcessingException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+                """);
+
+        // This class is reachable through Reachable, itself reachable from root, so it should conflict
+        sources.unreachableDependency(
+                "com.BreakingClass",
+                // language=java
+                """
+                package com;
+
+                import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+                @JsonSerialize(using = RemovedToStringSerializer.class)
+                public class BreakingClass {
+                }
+                """);
+
+        sources.transitiveBeforeDependency(
+                "com.RemovedToStringSerializer",
+                // language=java
+                """
+                package com;
+                import com.fasterxml.jackson.databind.JsonSerializer;
+                import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+                public class RemovedToStringSerializer extends ToStringSerializer {}
+                """);
+
+        // No classes after, so it should conflict
+
+        generateClassFiles(tempDir, sources.build());
+
+        assertThatExceptionOfType(InvocationTargetException.class)
+                .isThrownBy(() -> runClassFiles(tempDir))
+                .havingCause()
+                .isInstanceOf(TypeNotPresentException.class)
+                .withMessageContaining("com.RemovedToStringSerializer");
+
+        Path jacksonDatabindPath = Path.of(ObjectMapper.class
+                .getProtectionDomain()
+                .getCodeSource()
+                .getLocation()
+                .getPath());
+        Path jacksonCorePath = Path.of(JsonProcessingException.class
+                .getProtectionDomain()
+                .getCodeSource()
+                .getLocation()
+                .getPath());
+        List<Conflict> conflicts = checkConflicts(tempDir, jacksonDatabindPath, jacksonCorePath);
+
+        assertThat(conflicts).hasSize(1);
+        Conflict conflict = conflicts.get(0);
+        assertThat(conflict.category()).isEqualTo(ConflictCategory.CLASS_NOT_FOUND);
+        assertThat(conflict.dependency().targetClass().className()).isEqualTo("com.RemovedToStringSerializer");
     }
 }

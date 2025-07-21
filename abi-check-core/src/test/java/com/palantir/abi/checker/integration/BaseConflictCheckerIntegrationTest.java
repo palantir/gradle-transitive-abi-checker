@@ -40,6 +40,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -156,16 +157,20 @@ abstract class BaseConflictCheckerIntegrationTest {
      *   - the {@link #DEPENDENCY} directory's classes as the direct dependency
      *   - the {@link #TRANSITIVE} directory's classes as the transitive dependency, which might have conflicts
      */
-    protected static List<Conflict> checkConflicts(Path baseDir) {
-        Artifact root = loadArtifact(baseDir, ROOT);
-        Artifact dependency = loadArtifact(baseDir, DEPENDENCY);
-        Artifact transitive = loadArtifact(baseDir, TRANSITIVE);
+    protected static List<Conflict> checkConflicts(Path baseDir, Path... extraLibraries) {
+        Artifact root = loadArtifactFromBase(baseDir, ROOT);
+        Artifact dependency = loadArtifactFromBase(baseDir, DEPENDENCY);
+        Artifact transitive = loadArtifactFromBase(baseDir, TRANSITIVE);
 
         // Load the jdk as well, to get all runtime artifacts
         List<Artifact> artifacts = new ArrayList<>(getJdkArtifacts());
         artifacts.add(root);
         artifacts.add(dependency);
         artifacts.add(transitive);
+
+        artifacts.addAll(Arrays.stream(extraLibraries)
+                .map(BaseConflictCheckerIntegrationTest::loadArtifact)
+                .toList());
 
         ConflictCheckerConfiguration configuration = ConflictCheckerConfiguration.builder()
                 .addErrorArtifactPrefixes(DEPENDENCY)
@@ -212,9 +217,17 @@ abstract class BaseConflictCheckerIntegrationTest {
         Files.copy(javaFileObject.get().openInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
     }
 
-    private static Artifact loadArtifact(Path baseDir, String type) {
+    private static Artifact loadArtifactFromBase(Path baseDir, String type) {
+        return loadArtifact(target(baseDir, type), type);
+    }
+
+    private static Artifact loadArtifact(Path libraryPath) {
+        return loadArtifact(libraryPath, libraryPath.toString());
+    }
+
+    private static Artifact loadArtifact(Path path, String artifactName) {
         // Use new loaders to avoid any caching between tests
-        return new ArtifactLoader().load(target(baseDir, type), ArtifactName.of(type));
+        return new ArtifactLoader().load(path, ArtifactName.of(artifactName));
     }
 
     private static List<Artifact> getJdkArtifacts() {
