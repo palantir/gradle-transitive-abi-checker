@@ -53,28 +53,27 @@ public interface Conflict {
 
     ConflictCategory category();
 
-    @SuppressWarnings("for-rollout:StatementSwitchToExpressionSwitch")
     @JsonIgnore
     @Value.Derived
     default String reason() {
-        switch (category()) {
-            case CLASS_NOT_FOUND:
-                return "Class not found: " + dependency().targetClass();
-            case METHOD_SIGNATURE_NOT_FOUND:
+        return switch (category()) {
+            case CLASS_NOT_FOUND -> "Class not found: " + dependency().targetClass();
+            case METHOD_SIGNATURE_NOT_FOUND -> {
                 Preconditions.checkState(
                         dependency() instanceof MethodDependency,
                         "Method signature not found should only be used with MethodDependency");
-                return "Method not found: "
+                yield "Method not found: "
                         + ((MethodDependency) dependency()).targetMethod().pretty();
-            case FIELD_NOT_FOUND:
+            }
+            case FIELD_NOT_FOUND -> {
                 Preconditions.checkState(
                         dependency() instanceof FieldDependency,
                         "Field not found should only be used with FieldDependency");
-                return "Field not found: "
+                yield "Field not found: "
                         + ((FieldDependency) dependency()).field().pretty();
-            default:
-                throw new IllegalStateException("Unknown conflict category: " + category());
-        }
+            }
+            default -> throw new IllegalStateException("Unknown conflict category: " + category());
+        };
     }
 
     static Conflict classNotFound(Dependency dependency, ArtifactName usedBy, @Nullable ArtifactName existsIn) {
