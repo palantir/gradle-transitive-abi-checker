@@ -1,7 +1,7 @@
 # Run ./gradlew writeVersionsLocks to regenerate this file
-com.fasterxml.jackson.core:jackson-annotations:2.19.1 (1 constraints: 8d124821)
-com.fasterxml.jackson.core:jackson-core:2.19.1 (1 constraints: 8d124821)
-com.fasterxml.jackson.core:jackson-databind:2.19.1 (1 constraints: 3f054b3b)
+com.fasterxml.jackson.core:jackson-annotations:2.19.2 (1 constraints: 8e124921)
+com.fasterxml.jackson.core:jackson-core:2.19.2 (1 constraints: 8e124921)
+com.fasterxml.jackson.core:jackson-databind:2.19.2 (1 constraints: 40054c3b)
 com.github.ben-manes.caffeine:caffeine:3.2.2 (1 constraints: 09050236)
 com.google.code.findbugs:jsr305:3.0.2 (1 constraints: 0705fc35)
 com.google.errorprone:error_prone_annotations:2.40.0 (4 constraints: 0e2a84df)
