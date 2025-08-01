@@ -136,6 +136,7 @@ public abstract class TransitiveAbiCheckerTask extends DefaultTask {
         }
     }
 
+    @SuppressWarnings("for-rollout:IllegalMethodCalledDuringTaskExecution")
     private void internalCheckAbiConflicts() {
         TransitiveAbiCheckerExtension extension = getCheckerExtension().get();
         // Acts as the "entry point" for analyzing what classes are reachable and thus worth validating
