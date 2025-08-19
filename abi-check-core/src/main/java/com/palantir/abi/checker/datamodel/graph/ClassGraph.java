@@ -25,6 +25,7 @@ import com.palantir.abi.checker.datamodel.method.DeclaredMethod;
 import com.palantir.abi.checker.datamodel.method.MethodReference;
 import com.palantir.abi.checker.datamodel.method.Reference;
 import com.palantir.abi.checker.datamodel.types.ClassTypeDescriptor;
+import com.palantir.abi.checker.util.Constants;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -91,10 +92,23 @@ public final class ClassGraph {
     }
 
     public Optional<MethodReference> resolveMethodReference(DeclaredClass targetClass, MethodReference targetMethod) {
-        return resolveMember(targetClass, targetMethod, (clazz, method) -> {
+        Optional<MethodReference> methodReference = resolveMember(targetClass, targetMethod, (clazz, method) -> {
             DeclaredMethod declaredMethod = clazz.methods().get(method.method());
             return declaredMethod == null ? null : declaredMethod.reference();
         });
+
+        if (methodReference.isPresent()) {
+            MethodReference resolvedMethod = methodReference.get();
+            if (resolvedMethod.method().name().equals(Constants.INSTANCE_INIT_METHOD_NAME)
+                    && !resolvedMethod.clazz().equals(targetClass.className())) {
+                // If the method is a constructor, it can't be resolved to a different class than the one we requested
+                // See linking exceptions in
+                //   https://docs.oracle.com/javase/specs/jvms/se21/html/jvms-6.html#jvms-6.5.invokespecial
+                return Optional.empty();
+            }
+        }
+
+        return methodReference;
     }
 
     public Optional<FieldReference> resolveFieldReference(DeclaredClass targetClass, FieldReference targetField) {

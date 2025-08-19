@@ -90,6 +90,52 @@ public class MethodConflictCheckerIntegrationTest extends BaseConflictCheckerInt
     }
 
     @Test
+    public void removing_default_constructor_conflicts() {
+        JavaFiles.Builder sources = JavaFiles.builder();
+        sources.reachableDependency(
+                "com.BreakingClass",
+                // language=java
+                """
+                package com;
+                public class BreakingClass {
+                    public BreakingClass() {
+                        // Calling to create an actual ABI break at runtime for the java test
+                        new ClassWithAbiBreak();
+                    }
+                }
+                """);
+
+        sources.transitiveBeforeDependency(
+                "com.ClassWithAbiBreak",
+                // language=java
+                """
+                package com;
+                public class ClassWithAbiBreak {}
+                """);
+
+        sources.transitiveAfterDependency(
+                "com.ClassWithAbiBreak",
+                // language=java
+                """
+                package com;
+                public class ClassWithAbiBreak {
+                    public ClassWithAbiBreak(boolean arg) {}
+                }
+                """);
+
+        generateClassFiles(tempDir, sources.build());
+
+        assertThatExceptionOfType(InvocationTargetException.class)
+                .isThrownBy(() -> runClassFiles(tempDir))
+                .havingCause()
+                .isInstanceOf(NoSuchMethodError.class)
+                .withMessageContaining("com.ClassWithAbiBreak: method 'void <init>()' not found");
+
+        assertThatMethodNotFound(
+                tempDir, "com.BreakingClass", voidMethod("<init>"), "com.ClassWithAbiBreak", voidMethod("<init>"));
+    }
+
+    @Test
     public void removing_method_reference_conflicts() {
         JavaFiles.Builder sources = JavaFiles.builder();
         sources.reachableDependency(
