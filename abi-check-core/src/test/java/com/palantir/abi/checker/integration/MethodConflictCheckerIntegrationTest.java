@@ -119,6 +119,8 @@ public class MethodConflictCheckerIntegrationTest extends BaseConflictCheckerInt
                 """
                 package com;
                 public class ClassWithAbiBreak {
+                    // This effectively removes the default constructor, which is a binary break,
+                    //   even though the parent java.lang.Object constructor is still available
                     public ClassWithAbiBreak(boolean arg) {}
                 }
                 """);
