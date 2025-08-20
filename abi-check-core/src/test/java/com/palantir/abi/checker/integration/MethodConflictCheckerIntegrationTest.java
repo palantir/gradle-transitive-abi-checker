@@ -26,6 +26,7 @@ import com.palantir.abi.checker.datamodel.method.MethodDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Set;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -980,8 +981,7 @@ public class MethodConflictCheckerIntegrationTest extends BaseConflictCheckerInt
         assertNoConflicts(tempDir);
     }
 
-    // TODO(aldexis): Do not inherit static methods from interfaces
-    @Disabled("This isn't actually working yet")
+    @Disabled("https://github.com/palantir/gradle-transitive-abi-checker/issues/9")
     @Test
     public void inherited_static_method_call_from_interface_conflicts() {
         JavaFiles.Builder sources = JavaFiles.builder();
@@ -1360,6 +1360,136 @@ public class MethodConflictCheckerIntegrationTest extends BaseConflictCheckerInt
         generateClassFiles(tempDir, sources.build());
 
         assertNoConflicts(tempDir);
+    }
+
+    @Disabled("https://github.com/palantir/gradle-transitive-abi-checker/issues/33")
+    @Test
+    public void calling_unimplemented_interface_method_conflicts() {
+        JavaFiles.Builder sources = JavaFiles.builder();
+        sources.rootSources(
+                Set.of(
+                        file(
+                                "com.Root",
+                                // language=java
+                                """
+                package com;
+                public class Root {
+                    public Root() {
+                        // Even though MyClass doesn't implement newMethod, it can still be instantiated
+                        // but calling newMethod will throw an AbstractMethodError
+                        interact(new MyClass());
+                    }
+
+                    private static void interact(MyInterface myInt) {
+                        // newMethod only exists in the base interface, but isn't implemented yet in the main dependency
+                        myInt.newMethod();
+                    }
+                }
+                """)));
+
+        sources.reachableDependency(
+                "com.MyClass",
+                // language=java
+                """
+                package com;
+                public class MyClass implements MyInterface {}
+                """);
+
+        sources.transitiveBeforeDependency(
+                "com.MyInterface",
+                // language=java
+                """
+                package com;
+                public interface MyInterface {}
+                """);
+
+        sources.transitiveAfterDependency(
+                "com.MyInterface",
+                // language=java
+                """
+                package com;
+                public interface MyInterface {
+                    void newMethod();
+                }
+                """);
+
+        generateClassFiles(tempDir, sources.build());
+
+        assertThatExceptionOfType(InvocationTargetException.class)
+                .isThrownBy(() -> runClassFiles(tempDir))
+                .havingCause()
+                .isInstanceOf(AbstractMethodError.class)
+                .withMessageContainingAll("com.MyInterface", "abstract void newMethod()");
+
+        assertThatMethodNotFound(
+                tempDir,
+                "com.Root",
+                voidMethod("interact", "Lcom/MyInterface;"),
+                "com.MyClass",
+                voidMethod("newMethod"));
+    }
+
+    @Disabled("https://github.com/palantir/gradle-transitive-abi-checker/issues/33")
+    @Test
+    public void calling_unimplemented_abstract_method_conflicts() {
+        JavaFiles.Builder sources = JavaFiles.builder();
+        sources.rootSources(
+                Set.of(
+                        file(
+                                "com.Root",
+                                // language=java
+                                """
+                package com;
+                public class Root {
+                    public Root() {
+                        // Even though MyClass doesn't implement newMethod, it can still be instantiated
+                        // but calling newMethod will throw an AbstractMethodError
+                        interact(new MyClass());
+                    }
+
+                    private static void interact(Parent obj) {
+                        // newMethod only exists in the base interface, but isn't implemented yet in the main dependency
+                        obj.newMethod();
+                    }
+                }
+                """)));
+
+        sources.reachableDependency(
+                "com.MyClass",
+                // language=java
+                """
+                package com;
+                public class MyClass extends Parent {}
+                """);
+
+        sources.transitiveBeforeDependency(
+                "com.Parent",
+                // language=java
+                """
+                package com;
+                public abstract class Parent {}
+                """);
+
+        sources.transitiveAfterDependency(
+                "com.Parent",
+                // language=java
+                """
+                package com;
+                public abstract class Parent {
+                    public abstract void newMethod();
+                }
+                """);
+
+        generateClassFiles(tempDir, sources.build());
+
+        assertThatExceptionOfType(InvocationTargetException.class)
+                .isThrownBy(() -> runClassFiles(tempDir))
+                .havingCause()
+                .isInstanceOf(AbstractMethodError.class)
+                .withMessageContainingAll("com.Parent", "abstract void newMethod()");
+
+        assertThatMethodNotFound(
+                tempDir, "com.Root", voidMethod("interact", "Lcom/Parent;"), "com.MyClass", voidMethod("newMethod"));
     }
 
     private static void assertThatMethodNotFound(
