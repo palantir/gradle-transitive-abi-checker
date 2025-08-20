@@ -19,6 +19,7 @@ package com.palantir.abi.checker.integration;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.Compiler;
 import com.google.testing.compile.JavaFileObjects;
@@ -85,18 +86,33 @@ abstract class BaseConflictCheckerIntegrationTest {
     protected static void generateClassFiles(Path baseDir, JavaFiles sourceFiles) {
         Compiler compiler = Compiler.javac();
 
-        Compilation compilation = compiler.compile(sourceFiles.allBeforeSources());
+        // Compile the dependency sources first, against the old transitive sources.
+        Compilation compilationDependency = compiler.compile(ImmutableSet.<JavaFileObject>builder()
+                .addAll(sourceFiles.reachableDependencySources())
+                .addAll(sourceFiles.unreachableDependencySources())
+                .addAll(sourceFiles.transitiveBeforeSources())
+                .build());
 
         // We don't copy the classes for the transitive dependency since we want to replace them with the updated ones
-        copyClassFiles(compilation, target(baseDir, DEPENDENCY), sourceFiles.reachableDependencySources());
-        copyClassFiles(compilation, target(baseDir, DEPENDENCY), sourceFiles.unreachableDependencySources());
-        copyClassFiles(compilation, target(baseDir, ROOT), sourceFiles.rootSources());
+        copyClassFiles(compilationDependency, target(baseDir, DEPENDENCY), sourceFiles.reachableDependencySources());
+        copyClassFiles(compilationDependency, target(baseDir, DEPENDENCY), sourceFiles.unreachableDependencySources());
 
+        // Then compile the transitive sources, which will be used to compile the root project.
         if (!sourceFiles.transitiveAfterSources().isEmpty()) {
-            Compilation compilation2 = compiler.compile(sourceFiles.transitiveAfterSources());
-
-            copyClassFiles(compilation2, target(baseDir, TRANSITIVE), sourceFiles.transitiveAfterSources());
+            Compilation compilationTransitive = compiler.compile(ImmutableSet.<JavaFileObject>builder()
+                    .addAll(sourceFiles.transitiveAfterSources())
+                    .build());
+            copyClassFiles(compilationTransitive, target(baseDir, TRANSITIVE), sourceFiles.transitiveAfterSources());
         }
+
+        // Finally, compile the root project
+        Compilation compilationRoot = compiler.withClasspath(List.of(
+                        target(baseDir, DEPENDENCY).toFile(),
+                        target(baseDir, TRANSITIVE).toFile()))
+                .compile(ImmutableSet.<JavaFileObject>builder()
+                        .addAll(sourceFiles.rootSources())
+                        .build());
+        copyClassFiles(compilationRoot, target(baseDir, ROOT), sourceFiles.rootSources());
     }
 
     /**
