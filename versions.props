@@ -5,7 +5,7 @@ org.ow2.asm:asm-tree = 9.8
 org.immutables:* = 2.11.3
 
 # Tests
-com.google.testing.compile:compile-testing = 0.22.0
+com.google.testing.compile:compile-testing = 0.23.0
 com.netflix.nebula:nebula-test = 10.6.2
 org.junit:* = 5.13.4
 org.junit.jupiter:* = 5.13.4
@@ -15,4 +15,4 @@ org.assertj:assertj-core = 3.27.4
 # conflict resolution
 com.google.code.findbugs:jsr305 = 3.0.2
 com.google.errorprone:error_prone_annotations = 2.11.0
-org.checkerframework:checker-qual = 3.50.0
+org.checkerframework:checker-qual = 3.51.0
