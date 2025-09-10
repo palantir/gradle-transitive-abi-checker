@@ -10,11 +10,11 @@ com.github.ben-manes.caffeine:caffeine:3.2.2 (1 constraints: 09050236)
 
 com.google.code.findbugs:jsr305:3.0.2 (1 constraints: 0705fc35)
 
-com.google.errorprone:error_prone_annotations:2.40.0 (4 constraints: 402ad509)
+com.google.errorprone:error_prone_annotations:2.41.0 (4 constraints: 3b2ac809)
 
 com.google.guava:failureaccess:1.0.3 (1 constraints: 160ae3b4)
 
-com.google.guava:guava:33.4.8-jre (5 constraints: f84dc059)
+com.google.guava:guava:33.4.8-jre (5 constraints: fc4df45a)
 
 com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava (1 constraints: bd17c918)
 
@@ -22,9 +22,9 @@ com.google.j2objc:j2objc-annotations:3.0.0 (1 constraints: 150aeab4)
 
 org.immutables:value:2.11.3 (1 constraints: 3905353b)
 
-org.jspecify:jspecify:1.0.0 (4 constraints: 7636d87e)
+org.jspecify:jspecify:1.0.0 (4 constraints: 7436d47e)
 
-org.ow2.asm:asm:9.8 (2 constraints: a9123238)
+org.ow2.asm:asm:9.8 (2 constraints: aa124e38)
 
 org.ow2.asm:asm-tree:9.8 (1 constraints: b5043a2c)
 
@@ -38,9 +38,9 @@ com.google.auto:auto-common:1.2.2 (1 constraints: 181210fb)
 
 com.google.auto.value:auto-value-annotations:1.11.0 (2 constraints: d01cd319)
 
-com.google.testing.compile:compile-testing:0.22.0 (1 constraints: 36052d3b)
+com.google.testing.compile:compile-testing:0.23.0 (1 constraints: 3705303b)
 
-com.google.truth:truth:1.4.4 (1 constraints: 1c1218fb)
+com.google.truth:truth:1.4.5 (1 constraints: 1d1219fb)
 
 com.netflix.nebula:nebula-test:10.6.2 (2 constraints: d61de72d)
 
