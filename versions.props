@@ -1,7 +1,7 @@
 com.fasterxml.jackson.*:* = 2.19.2
 com.github.ben-manes.caffeine:caffeine = 3.2.2
 com.google.guava:guava = 33.5.0-jre
-org.ow2.asm:asm-tree = 9.8
+org.ow2.asm:asm-tree = 9.9
 org.immutables:* = 2.11.4
 
 # Tests
