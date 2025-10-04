@@ -24,9 +24,9 @@ org.immutables:value:2.11.4 (1 constraints: 3a05363b)
 
 org.jspecify:jspecify:1.0.0 (10 constraints: b49cd429)
 
-org.ow2.asm:asm:9.8 (2 constraints: aa124e38)
+org.ow2.asm:asm:9.9 (2 constraints: ab124f38)
 
-org.ow2.asm:asm-tree:9.8 (1 constraints: b5043a2c)
+org.ow2.asm:asm-tree:9.9 (1 constraints: b6043b2c)
 
 
 
