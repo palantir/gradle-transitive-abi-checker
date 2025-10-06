@@ -14,7 +14,7 @@ com.google.errorprone:error_prone_annotations:2.41.0 (4 constraints: 372a3d09)
 
 com.google.guava:failureaccess:1.0.3 (1 constraints: 160ae3b4)
 
-com.google.guava:guava:33.5.0-jre (5 constraints: f54d3f55)
+com.google.guava:guava:33.5.0-jre (5 constraints: ee4d1e55)
 
 com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava (1 constraints: bd17c918)
 
@@ -44,9 +44,9 @@ com.google.truth:truth:1.4.5 (1 constraints: 1d1219fb)
 
 com.netflix.nebula:nebula-test:10.6.2 (2 constraints: d61de72d)
 
-com.palantir.gradle.plugintesting:configuration-cache-spec:0.11.0 (1 constraints: 3405263b)
+com.palantir.gradle.plugintesting:configuration-cache-spec:0.12.0 (1 constraints: 3505293b)
 
-com.palantir.gradle.plugintesting:plugin-testing-core:0.11.0 (1 constraints: 3405263b)
+com.palantir.gradle.plugintesting:plugin-testing-core:0.12.0 (1 constraints: 3505293b)
 
 junit:junit:4.13.2 (3 constraints: f82ab406)
 
@@ -66,11 +66,11 @@ org.junit:junit-bom:6.0.0 (1 constraints: 08050936)
 
 org.junit.jupiter:junit-jupiter:6.0.0 (2 constraints: 531036d1)
 
-org.junit.jupiter:junit-jupiter-api:6.0.0 (6 constraints: 2c54643e)
+org.junit.jupiter:junit-jupiter-api:6.0.0 (6 constraints: f553bbff)
 
 org.junit.jupiter:junit-jupiter-engine:6.0.0 (2 constraints: 0f17403b)
 
-org.junit.jupiter:junit-jupiter-params:6.0.0 (3 constraints: cd2d9053)
+org.junit.jupiter:junit-jupiter-params:6.0.0 (3 constraints: 962d2f2e)
 
 org.junit.platform:junit-platform-commons:6.0.0 (3 constraints: df292429)
 
