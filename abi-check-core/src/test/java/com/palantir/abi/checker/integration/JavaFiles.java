@@ -57,13 +57,10 @@ interface JavaFiles {
         if (!sb.isEmpty()) {
             sb.append("\n");
         }
-        JavaFileObject rootSource = JavaFileObjects.forSourceString(
-                "com.Root",
-                """
-                package com;
-                public class Root {%s}
-                """
-                        .formatted(sb.toString()));
+        JavaFileObject rootSource = JavaFileObjects.forSourceString("com.Root", """
+            package com;
+            public class Root {%s}
+            """.formatted(sb.toString()));
 
         return Set.of(rootSource);
     }
