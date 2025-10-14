@@ -149,21 +149,19 @@ public abstract class TransitiveAbiCheckerTask extends DefaultTask {
         // Allow a consumer to check the classes completely in cases where they know better
         if (currentProjectClasses.isEmpty() && !checkCompletely) {
             log.warn("Skipping ABI check, no source classes, see info log for details");
-            log.info(
-                    """
+            log.info("""
 
-                    {} has the java-library plugin applied, but has no classes in its main sourceset.
-                    This either indicates some form of misconfiguration i.e. overly applying the java-library to
-                    'allProjects', or some sort of 'container' project intended for shaded dependencies etc.
-                    If you are certain you need to check the ABI compatibility in this scenario add the following
-                    to your task configuration:
+                {} has the java-library plugin applied, but has no classes in its main sourceset.
+                This either indicates some form of misconfiguration i.e. overly applying the java-library to
+                'allProjects', or some sort of 'container' project intended for shaded dependencies etc.
+                If you are certain you need to check the ABI compatibility in this scenario add the following
+                to your task configuration:
 
-                    transitiveAbiChecker {
-                        checkCompletely = true
-                    }
+                transitiveAbiChecker {
+                    checkCompletely = true
+                }
 
-                    """,
-                    getProject().getName());
+                """, getProject().getName());
 
             return;
         }

@@ -1366,12 +1366,10 @@ public class MethodConflictCheckerIntegrationTest extends BaseConflictCheckerInt
     @Test
     public void calling_unimplemented_interface_method_conflicts() {
         JavaFiles.Builder sources = JavaFiles.builder();
-        sources.rootSources(
-                Set.of(
-                        file(
-                                "com.Root",
-                                // language=java
-                                """
+        sources.rootSources(Set.of(file(
+                "com.Root",
+                // language=java
+                """
                 package com;
                 public class Root {
                     public Root() {
@@ -1433,12 +1431,10 @@ public class MethodConflictCheckerIntegrationTest extends BaseConflictCheckerInt
     @Test
     public void calling_unimplemented_abstract_method_conflicts() {
         JavaFiles.Builder sources = JavaFiles.builder();
-        sources.rootSources(
-                Set.of(
-                        file(
-                                "com.Root",
-                                // language=java
-                                """
+        sources.rootSources(Set.of(file(
+                "com.Root",
+                // language=java
+                """
                 package com;
                 public class Root {
                     public Root() {
