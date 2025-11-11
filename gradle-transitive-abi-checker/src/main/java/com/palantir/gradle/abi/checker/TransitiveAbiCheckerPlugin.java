@@ -59,6 +59,7 @@ public class TransitiveAbiCheckerPlugin implements Plugin<Project> {
         TransitiveAbiCheckerExtension abiCheckerExtension =
                 subproject.getExtensions().create("transitiveAbiChecker", TransitiveAbiCheckerExtension.class);
 
+        @SuppressWarnings("for-rollout:TaskDependsOn")
         TaskProvider<TransitiveAbiCheckerTask> abiCheckTask = subproject
                 .getTasks()
                 .register("checkAbiCompatibility", TransitiveAbiCheckerTask.class, task -> {
@@ -101,6 +102,7 @@ public class TransitiveAbiCheckerPlugin implements Plugin<Project> {
     /**
      * Finds all the resolved artifacts for this project's runtime classpath.
      */
+    @SuppressWarnings("for-rollout:TaskDependsOn")
     private static void setResolvedRuntimeArtifacts(
             Project subproject,
             TransitiveAbiCheckerTask task,
