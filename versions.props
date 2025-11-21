@@ -3,17 +3,17 @@ com.fasterxml.jackson.core:jackson-annotations = 2.20
 com.github.ben-manes.caffeine:caffeine = 3.2.2
 com.google.guava:guava = 33.5.0-jre
 org.ow2.asm:asm-tree = 9.9
-org.immutables:* = 2.11.6
+org.immutables:* = 2.11.7
 
 # Tests
 com.google.testing.compile:compile-testing = 0.23.0
 com.netflix.nebula:nebula-test = 10.6.2
-org.junit:* = 6.0.0
-org.junit.jupiter:* = 6.0.0
-org.junit.platform:* = 6.0.0
+org.junit:* = 6.0.1
+org.junit.jupiter:* = 6.0.1
+org.junit.platform:* = 6.0.1
 org.assertj:assertj-core = 3.27.6
 
 # conflict resolution
 com.google.code.findbugs:jsr305 = 3.0.2
 com.google.errorprone:error_prone_annotations = 2.11.0
-org.checkerframework:checker-qual = 3.51.1
+org.checkerframework:checker-qual = 3.52.0
