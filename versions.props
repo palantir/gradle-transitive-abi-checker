@@ -3,7 +3,7 @@ com.fasterxml.jackson.core:jackson-annotations = 2.20
 com.github.ben-manes.caffeine:caffeine = 3.2.2
 com.google.guava:guava = 33.5.0-jre
 org.ow2.asm:asm-tree = 9.9
-org.immutables:* = 2.11.7
+org.immutables:* = 2.12.0
 
 # Tests
 com.google.testing.compile:compile-testing = 0.23.0
