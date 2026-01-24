@@ -11,7 +11,7 @@ com.netflix.nebula:nebula-test = 10.6.2
 org.junit:* = 6.0.2
 org.junit.jupiter:* = 6.0.2
 org.junit.platform:* = 6.0.2
-org.assertj:assertj-core = 3.27.6
+org.assertj:assertj-core = 3.27.7
 
 # conflict resolution
 com.google.code.findbugs:jsr305 = 3.0.2
