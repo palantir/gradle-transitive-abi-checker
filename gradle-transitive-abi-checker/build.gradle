@@ -18,8 +18,6 @@ dependencies {
     testImplementation 'com.netflix.nebula:nebula-test'
 }
 
-// generate plugin test files when generating Eclipse projects
-tasks.eclipse.dependsOn pluginUnderTestMetadata
 
 gradlePlugin {
     website = 'https://github.com/palantir/gradle-transitive-abi-checker'
