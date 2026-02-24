@@ -1,6 +1,6 @@
 com.fasterxml.jackson.*:* = 2.21.1
 com.fasterxml.jackson.core:jackson-annotations = 2.21
-com.github.ben-manes.caffeine:caffeine = 3.2.2
+com.github.ben-manes.caffeine:caffeine = 3.2.3
 com.google.guava:guava = 33.5.0-jre
 org.ow2.asm:asm-tree = 9.9.1
 org.immutables:* = 2.12.1
