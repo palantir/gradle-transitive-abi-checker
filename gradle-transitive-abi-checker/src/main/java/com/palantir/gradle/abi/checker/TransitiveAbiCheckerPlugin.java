@@ -136,13 +136,14 @@ public class TransitiveAbiCheckerPlugin implements Plugin<Project> {
         //   so we can make sure we analyze the correct classes
         // This is among others the classpath ordering that ends up being used in
         // https://github.com/palantir/sls-packaging/blob/4a96288316281b6e4020fa410e351b91c27ca1ab/gradle-sls-packaging/src/main/java/com/palantir/gradle/dist/service/JavaServiceDistributionPlugin.java#L318-L325
-        task.getResolvedRuntimeClasspathArtifacts().set(resolvedArtifacts.map(resolved -> resolved.stream()
-                .map(resolvedArtifact -> {
-                    ResolvedArtifactDefinition definition =
-                            subproject.getObjects().newInstance(ResolvedArtifactDefinition.class);
-                    definition.setup(resolvedArtifact);
-                    return definition;
-                })
-                .collect(Collectors.toList())));
+        task.getResolvedRuntimeClasspathArtifacts()
+                .set(resolvedArtifacts.map(resolved -> resolved.stream()
+                        .map(resolvedArtifact -> {
+                            ResolvedArtifactDefinition definition =
+                                    subproject.getObjects().newInstance(ResolvedArtifactDefinition.class);
+                            definition.setup(resolvedArtifact);
+                            return definition;
+                        })
+                        .collect(Collectors.toList())));
     }
 }

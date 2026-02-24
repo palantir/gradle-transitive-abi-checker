@@ -67,8 +67,9 @@ public final class ConflictPrinter {
         sb.append("ABI Incompatibilities were detected between the following libraries. ");
         sb.append("You should upgrade or downgrade one for each pair. Exact conflicts are detailed below.\n\n");
 
-        final SortedMap<String, List<String>> incompatibleDependencies =
-                Maps.transformValues(byBrokenDependency, conflicts -> conflicts.stream()
+        final SortedMap<String, List<String>> incompatibleDependencies = Maps.transformValues(
+                byBrokenDependency,
+                conflicts -> conflicts.stream()
                         .map(c -> c.existsIn().name())
                         .distinct()
                         .toList());
