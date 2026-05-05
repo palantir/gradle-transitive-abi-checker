@@ -6,11 +6,11 @@ com.fasterxml.jackson.core:jackson-core:2.21.1 (1 constraints: 86123421)
 
 com.fasterxml.jackson.core:jackson-databind:2.21.1 (1 constraints: 3805373b)
 
-com.github.ben-manes.caffeine:caffeine:3.2.3 (1 constraints: 0a050336)
+com.github.ben-manes.caffeine:caffeine:3.2.4 (1 constraints: 0b050436)
 
 com.google.code.findbugs:jsr305:3.0.2 (1 constraints: 0705fc35)
 
-com.google.errorprone:error_prone_annotations:2.47.0 (4 constraints: 492ae60e)
+com.google.errorprone:error_prone_annotations:2.49.0 (4 constraints: 4f2a7810)
 
 com.google.guava:failureaccess:1.0.3 (1 constraints: 160ae3b4)
 
