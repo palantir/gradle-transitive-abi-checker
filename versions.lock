@@ -74,19 +74,19 @@ org.jetbrains:annotations:26.1.0 (1 constraints: d81910df)
 
 org.junit:junit-bom:6.0.3 (1 constraints: 0b050c36)
 
-org.junit.jupiter:junit-jupiter:6.0.3 (2 constraints: 591093d1)
+org.junit.jupiter:junit-jupiter:6.1.0 (2 constraints: 571059d1)
 
-org.junit.jupiter:junit-jupiter-api:6.0.3 (7 constraints: 166e1744)
+org.junit.jupiter:junit-jupiter-api:6.1.0 (7 constraints: 0e6ead40)
 
-org.junit.jupiter:junit-jupiter-engine:6.0.3 (2 constraints: 1517be3b)
+org.junit.jupiter:junit-jupiter-engine:6.1.0 (2 constraints: 1317be3b)
 
-org.junit.jupiter:junit-jupiter-params:6.0.3 (3 constraints: d32d0e54)
+org.junit.jupiter:junit-jupiter-params:6.1.0 (3 constraints: d12d0e54)
 
-org.junit.platform:junit-platform-commons:6.0.3 (3 constraints: e829d72a)
+org.junit.platform:junit-platform-commons:6.1.0 (3 constraints: e429752a)
 
-org.junit.platform:junit-platform-engine:6.0.3 (4 constraints: 35390bbd)
+org.junit.platform:junit-platform-engine:6.1.0 (4 constraints: 31390dbc)
 
-org.junit.platform:junit-platform-launcher:6.0.3 (3 constraints: 6824e9f5)
+org.junit.platform:junit-platform-launcher:6.1.0 (3 constraints: 6824e9f5)
 
 org.objenesis:objenesis:2.4 (1 constraints: ea0c8c0a)
 
