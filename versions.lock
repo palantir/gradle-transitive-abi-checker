@@ -86,7 +86,7 @@ org.junit.platform:junit-platform-commons:6.1.0 (3 constraints: e229bb29)
 
 org.junit.platform:junit-platform-engine:6.1.0 (4 constraints: 2f39fdba)
 
-org.junit.platform:junit-platform-launcher:6.1.0 (3 constraints: 6624e9f5)
+org.junit.platform:junit-platform-launcher:6.1.0 (3 constraints: 642435f5)
 
 org.objenesis:objenesis:2.4 (1 constraints: ea0c8c0a)
 
