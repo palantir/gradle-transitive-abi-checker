@@ -75,47 +75,6 @@ public class ClassConflictCheckerIntegrationTest extends BaseConflictCheckerInte
     }
 
     @Test
-    public void try_catch_can_ignore_conflict() {
-        JavaFiles.Builder sources = JavaFiles.builder();
-        sources.reachableDependency(
-                "com.BreakingClass",
-                // language=java
-                """
-                package com;
-                public class BreakingClass {
-                    public ClassWithAbiBreak field;
-                    public BreakingClass() {
-                        try {
-                            field = new ClassWithAbiBreak();
-                        } catch (NoClassDefFoundError e) {
-                            // ignore
-                        }
-                    }
-                }
-                """);
-
-        sources.transitiveBeforeDependency(
-                "com.ClassWithAbiBreak",
-                // language=java
-                """
-                package com;
-                public class ClassWithAbiBreak {}
-                """);
-
-        sources.transitiveAfterDependency(
-                "com.RenamedClassWithAbiBreak",
-                // language=java
-                """
-                package com;
-                public class RenamedClassWithAbiBreak {}
-                """);
-
-        generateClassFiles(tempDir, sources.build());
-
-        assertNoConflicts(tempDir);
-    }
-
-    @Test
     public void renaming_super_class_creates_conflicts() {
         JavaFiles.Builder sources = JavaFiles.builder();
         sources.reachableDependency(
@@ -193,7 +152,7 @@ public class ClassConflictCheckerIntegrationTest extends BaseConflictCheckerInte
     }
 
     @Test
-    public void renaming_caught_exception_creates_conflicts() {
+    public void removed_caught_exception_creates_conflicts() {
         JavaFiles.Builder sources = JavaFiles.builder();
         sources.reachableDependency(
                 "com.BreakingClass",

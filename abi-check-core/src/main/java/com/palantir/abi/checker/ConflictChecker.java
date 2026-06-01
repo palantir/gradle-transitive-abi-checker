@@ -164,10 +164,13 @@ public final class ConflictChecker {
                 continue;
             }
 
-            conflicts.add(Conflict.classNotFound(
-                    ClassDependency.of(method, exceptionReference, reachabilityPath),
-                    artifactName,
-                    index.sourceMappings().get(exception)));
+            final Optional<DeclaredClass> calledClass = classGraph.loadClass(exception);
+            if (calledClass.isEmpty()) {
+                conflicts.add(Conflict.classNotFound(
+                        ClassDependency.of(method, exceptionReference, reachabilityPath),
+                        artifactName,
+                        index.sourceMappings().get(exception)));
+            }
         }
 
         return conflicts;
