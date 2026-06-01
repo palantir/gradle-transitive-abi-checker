@@ -45,7 +45,7 @@ import org.immutables.value.Value;
  * used in Conflict when reporting problems.
  */
 @Value.Immutable
-@JsonSerialize(as = ImmutableMethodDependency.class)
+@JsonSerialize(as = ImmutableClassDependency.class)
 public interface ClassDependency extends Dependency {
 
     static ClassDependency of(

@@ -24,7 +24,8 @@ import com.palantir.abi.checker.datamodel.types.TypeDescriptor;
 /**
  * Represents a reference to a specific field in a given class.
  */
-public record FieldReference(ClassTypeDescriptor clazz, FieldDescriptor field, boolean isStatic) implements MemberReference {
+public record FieldReference(ClassTypeDescriptor clazz, FieldDescriptor field, boolean isStatic)
+        implements MemberReference {
 
     public TypeDescriptor type() {
         return field.type();
