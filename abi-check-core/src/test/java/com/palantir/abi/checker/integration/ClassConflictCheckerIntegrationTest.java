@@ -191,4 +191,50 @@ public class ClassConflictCheckerIntegrationTest extends BaseConflictCheckerInte
 
         assertNoConflicts(tempDir);
     }
+
+    @Test
+    public void renaming_caught_exception_creates_conflicts() {
+        JavaFiles.Builder sources = JavaFiles.builder();
+        sources.reachableDependency(
+                "com.BreakingClass",
+                // language=java
+                """
+                package com;
+                public class BreakingClass {
+                    public void method() {
+                        try {
+                            // This statement is purely here to avoid the entire block being removed by the compiler
+                            System.out.println("test");
+                        } catch (RemovedException e) {
+                            // ignore
+                        }
+                    }
+                }
+                """);
+
+        sources.transitiveBeforeDependency(
+                "com.RemovedException",
+                // language=java
+                """
+                package com;
+                public class RemovedException extends RuntimeException {}
+                """);
+
+        generateClassFiles(tempDir, sources.build());
+
+        assertThatExceptionOfType(InvocationTargetException.class)
+                .isThrownBy(() -> runClassFiles(tempDir))
+                .havingCause()
+                .isInstanceOf(NoClassDefFoundError.class)
+                .withMessageContaining("com/RemovedException");
+
+        List<Conflict> conflicts = checkConflicts(tempDir);
+
+        assertThat(conflicts).hasSize(1);
+        Conflict conflict = conflicts.get(0);
+        assertThat(conflict.category()).isEqualTo(ConflictCategory.CLASS_NOT_FOUND);
+        assertThat(conflict.dependency().targetClass().className()).isEqualTo("com.RemovedException");
+        // Verify the line number matches the one from the source code
+        assertThat(conflict.dependency().fromLineNumber()).isEqualTo(7);
+    }
 }

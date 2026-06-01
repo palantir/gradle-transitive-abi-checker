@@ -17,13 +17,14 @@
 package com.palantir.abi.checker.datamodel.method;
 
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.palantir.abi.checker.datamodel.reference.MemberReference;
 import com.palantir.abi.checker.datamodel.types.ClassTypeDescriptor;
 
 /**
  * Represents a reference to a specific method in a given class.
  */
 public record MethodReference(ClassTypeDescriptor clazz, MethodDescriptor method, boolean isStatic)
-        implements Reference {
+        implements MemberReference {
 
     public String pretty() {
         return method.returnType() + " " + clazz + "." + method.prettyWithoutReturnType();

@@ -36,6 +36,7 @@ import com.palantir.abi.checker.datamodel.Artifact;
 import com.palantir.abi.checker.datamodel.ArtifactName;
 import com.palantir.abi.checker.datamodel.DeclaredClass;
 import com.palantir.abi.checker.datamodel.classlocation.ClassLocation;
+import com.palantir.abi.checker.datamodel.conflict.ClassDependency;
 import com.palantir.abi.checker.datamodel.conflict.Conflict;
 import com.palantir.abi.checker.datamodel.conflict.FieldDependency;
 import com.palantir.abi.checker.datamodel.conflict.MethodDependency;
@@ -45,6 +46,7 @@ import com.palantir.abi.checker.datamodel.graph.ClassIndex;
 import com.palantir.abi.checker.datamodel.method.CallSite;
 import com.palantir.abi.checker.datamodel.method.DeclaredMethod;
 import com.palantir.abi.checker.datamodel.method.MethodReference;
+import com.palantir.abi.checker.datamodel.reference.ClassReference;
 import com.palantir.abi.checker.datamodel.types.ClassTypeDescriptor;
 import com.palantir.abi.checker.util.ExceptionsChecker;
 import java.util.ArrayList;
@@ -142,10 +144,32 @@ public final class ConflictChecker {
                     .orElseThrow(() -> new IllegalStateException("Class not found: " + reachableClass));
 
             for (DeclaredMethod method : clazz.methods().values()) {
+                conflicts.addAll(checkForBrokenCaughtExceptions(owningArtifact, method, reachabilityPath));
                 conflicts.addAll(checkForBrokenMethodCalls(owningArtifact, method, reachabilityPath));
                 conflicts.addAll(checkForBrokenFieldAccess(owningArtifact, method, reachabilityPath));
             }
         }
+        return conflicts;
+    }
+
+    private List<Conflict> checkForBrokenCaughtExceptions(
+            ArtifactName artifactName, DeclaredMethod method, List<ClassTypeDescriptor> reachabilityPath) {
+        List<Conflict> conflicts = new ArrayList<>();
+
+        for (CallSite<ClassReference> exceptionReference : method.caughtExceptions()) {
+            ClassTypeDescriptor exception = exceptionReference.owner();
+
+            if (configuration.shouldIgnoreClass(exception)) {
+                // Don't register a conflict if the target class is ignored
+                continue;
+            }
+
+            conflicts.add(Conflict.classNotFound(
+                    ClassDependency.of(method, exceptionReference, reachabilityPath),
+                    artifactName,
+                    index.sourceMappings().get(exception)));
+        }
+
         return conflicts;
     }
 

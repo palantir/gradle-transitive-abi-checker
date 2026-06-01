@@ -16,7 +16,10 @@
 
 package com.palantir.abi.checker.datamodel.method;
 
+import com.palantir.abi.checker.datamodel.reference.MemberReference;
+import com.palantir.abi.checker.datamodel.reference.Reference;
 import com.palantir.abi.checker.datamodel.types.ClassTypeDescriptor;
+import java.util.Collections;
 import java.util.Set;
 
 /**
@@ -31,7 +34,11 @@ public record CallSite<T extends Reference>(T reference, int lineNumber, Set<Cla
         return reference.clazz();
     }
 
-    public static <T extends Reference> CallSite<T> of(
+    public static <T extends Reference> CallSite<T> of(T reference, int lineNumber) {
+        return new CallSite<>(reference, lineNumber, Collections.emptySet());
+    }
+
+    public static <T extends MemberReference> CallSite<T> of(
             T reference, int lineNumber, Set<ClassTypeDescriptor> caughtExceptions) {
         return new CallSite<>(reference, lineNumber, caughtExceptions);
     }

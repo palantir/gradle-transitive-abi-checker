@@ -30,37 +30,31 @@
  * the License.
  */
 
-package com.palantir.abi.checker.datamodel.method;
+package com.palantir.abi.checker.datamodel.conflict;
 
-import com.palantir.abi.checker.datamodel.field.FieldReference;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.palantir.abi.checker.datamodel.method.CallSite;
+import com.palantir.abi.checker.datamodel.method.DeclaredMethod;
 import com.palantir.abi.checker.datamodel.reference.ClassReference;
-import java.util.Set;
+import com.palantir.abi.checker.datamodel.types.ClassTypeDescriptor;
+import java.util.List;
 import org.immutables.value.Value;
 
 /**
- * Represents the details of a declared method within a class,
- *   including which methods it's calling and which fields it's accessing.
+ * Represents a dependency between a method and a class it directly references (e.g. in caught exceptions),
+ * used in Conflict when reporting problems.
  */
 @Value.Immutable
-public interface DeclaredMethod {
-    MethodReference reference();
+@JsonSerialize(as = ImmutableMethodDependency.class)
+public interface ClassDependency extends Dependency {
 
-    /**
-     * Exceptions caught by this method. These trigger NoClassDefFoundError
-     * at Class verification time if not found (i.e. even if the method itself is unused).
-     *
-     * See https://docs.oracle.com/javase/specs/jvms/se23/html/jvms-4.html#jvms-4.9.2
-     * "Each class mentioned in a catch_type item of the exception_table array of the method's
-     * Code_attribute structure must be Throwable or a subclass of Throwable."
-     */
-    Set<CallSite<ClassReference>> caughtExceptions();
-
-    /** Calls that this method makes to other methods. */
-    Set<CallSite<MethodReference>> methodCalls();
-
-    Set<CallSite<FieldReference>> fieldAccesses();
-
-    static ImmutableDeclaredMethod.Builder builder() {
-        return ImmutableDeclaredMethod.builder();
+    static ClassDependency of(
+            DeclaredMethod method, CallSite<ClassReference> targetClass, List<ClassTypeDescriptor> reachabilityPath) {
+        return ImmutableClassDependency.builder()
+                .reachabilityPath(reachabilityPath)
+                .fromMethod(method.reference())
+                .fromLineNumber(targetClass.lineNumber())
+                .targetClass(targetClass.owner())
+                .build();
     }
 }

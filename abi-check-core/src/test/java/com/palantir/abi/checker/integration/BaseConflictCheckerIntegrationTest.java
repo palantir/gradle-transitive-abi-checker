@@ -48,6 +48,7 @@ import java.util.stream.Stream;
 import javax.tools.JavaFileObject;
 import javax.tools.JavaFileObject.Kind;
 import javax.tools.StandardLocation;
+import org.junit.jupiter.api.io.CleanupMode;
 import org.junit.jupiter.api.io.TempDir;
 
 abstract class BaseConflictCheckerIntegrationTest {
@@ -63,7 +64,7 @@ abstract class BaseConflictCheckerIntegrationTest {
      * If you want to manually inspect the class files, you can remove the TempDir annotation and set it to e.g.
      *   Paths.get("build/tmp/abi-checker-test").
      */
-    @TempDir
+    @TempDir(cleanup = CleanupMode.ON_SUCCESS)
     public Path tempDir;
 
     protected static JavaFileObject file(String className, String source) {
@@ -84,6 +85,8 @@ abstract class BaseConflictCheckerIntegrationTest {
      * The class files will be copied in the provided directory, each under their respective subdirectory.
      */
     protected static void generateClassFiles(Path baseDir, JavaFiles sourceFiles) {
+        System.out.println("Generating class files to " + baseDir);
+
         Compiler compiler = Compiler.javac();
 
         // Compile the dependency sources first, against the old transitive sources.
