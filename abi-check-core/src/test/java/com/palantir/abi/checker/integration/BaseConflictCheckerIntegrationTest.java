@@ -27,6 +27,7 @@ import com.palantir.abi.checker.AbiCheckerClassLoader;
 import com.palantir.abi.checker.ArtifactLoader;
 import com.palantir.abi.checker.ConflictChecker;
 import com.palantir.abi.checker.ConflictCheckerConfiguration;
+import com.palantir.abi.checker.ImmutableConflictCheckerConfiguration;
 import com.palantir.abi.checker.JdkModuleLoader;
 import com.palantir.abi.checker.datamodel.Artifact;
 import com.palantir.abi.checker.datamodel.ArtifactName;
@@ -167,6 +168,10 @@ abstract class BaseConflictCheckerIntegrationTest {
         }
     }
 
+    protected static ImmutableConflictCheckerConfiguration.Builder config() {
+        return ConflictCheckerConfiguration.builder().addErrorArtifactPrefixes(DEPENDENCY);
+    }
+
     /**
      * Checks for conflicts for classes previously generated in baseDir by calling {@link #generateClassFiles}.
      *
@@ -176,6 +181,12 @@ abstract class BaseConflictCheckerIntegrationTest {
      *   - the {@link #TRANSITIVE} directory's classes as the transitive dependency, which might have conflicts
      */
     protected static List<Conflict> checkConflicts(Path baseDir) {
+        ConflictCheckerConfiguration configuration = config().build();
+
+        return checkConflicts(baseDir, configuration);
+    }
+
+    protected static List<Conflict> checkConflicts(Path baseDir, ConflictCheckerConfiguration configuration) {
         Artifact root = loadArtifact(baseDir, ROOT);
         Artifact dependency = loadArtifact(baseDir, DEPENDENCY);
         Artifact transitive = loadArtifact(baseDir, TRANSITIVE);
@@ -185,10 +196,6 @@ abstract class BaseConflictCheckerIntegrationTest {
         artifacts.add(root);
         artifacts.add(dependency);
         artifacts.add(transitive);
-
-        ConflictCheckerConfiguration configuration = ConflictCheckerConfiguration.builder()
-                .addErrorArtifactPrefixes(DEPENDENCY)
-                .build();
 
         // Use new loaders to avoid any caching between tests
         return ConflictChecker.checkWithEntryPoints(
