@@ -16,7 +16,6 @@
 
 package com.palantir.gradle.abi.checker;
 
-import com.google.common.collect.Maps;
 import com.palantir.abi.checker.datamodel.conflict.Conflict;
 import com.palantir.abi.checker.datamodel.types.ClassTypeDescriptor;
 import java.util.Collection;
@@ -67,20 +66,27 @@ public final class ConflictPrinter {
         sb.append("ABI Incompatibilities were detected between the following libraries. ");
         sb.append("You should upgrade or downgrade one for each pair. Exact conflicts are detailed below.\n\n");
 
-        final SortedMap<String, List<String>> incompatibleDependencies = Maps.transformValues(
-                byBrokenDependency,
-                conflicts -> conflicts.stream()
-                        .map(c -> c.existsIn().name())
-                        .distinct()
-                        .toList());
+        byBrokenDependency.forEach((dependency, conflicts) -> {
+            List<String> missingClassesInUnknownDep = conflicts.stream()
+                    .filter(c -> c.existsIn().name().equals(Conflict.UNKNOWN_ARTIFACT_NAME_STRING))
+                    .map(c -> c.dependency().targetClass().toString())
+                    .distinct()
+                    .sorted()
+                    .toList();
 
-        incompatibleDependencies.forEach((dependency, brokenTransitives) -> {
-            if (brokenTransitives.contains(Conflict.UNKNOWN_ARTIFACT_NAME_STRING)) {
+            if (!missingClassesInUnknownDep.isEmpty()) {
                 sb.append("\t" + dependency + " refers to unknown classes, "
                         + "so we couldn't determine the transitive library that broke its ABI.\n");
+                for (String clazz : missingClassesInUnknownDep) {
+                    sb.append("\t\t" + clazz + "\n");
+                }
             }
-            List<String> knownBrokenTransitives = brokenTransitives.stream()
-                    .filter(brokenTransitive -> !brokenTransitive.equals(Conflict.UNKNOWN_ARTIFACT_NAME_STRING))
+
+            List<String> knownBrokenTransitives = conflicts.stream()
+                    .map(c -> c.existsIn().name())
+                    .distinct()
+                    .filter(name -> !name.equals(Conflict.UNKNOWN_ARTIFACT_NAME_STRING))
+                    .sorted()
                     .toList();
 
             if (knownBrokenTransitives.isEmpty()) {
