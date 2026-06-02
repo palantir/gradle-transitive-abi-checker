@@ -27,6 +27,7 @@ import com.palantir.abi.checker.AbiCheckerClassLoader;
 import com.palantir.abi.checker.ArtifactLoader;
 import com.palantir.abi.checker.ConflictChecker;
 import com.palantir.abi.checker.ConflictCheckerConfiguration;
+import com.palantir.abi.checker.ImmutableConflictCheckerConfiguration;
 import com.palantir.abi.checker.JdkModuleLoader;
 import com.palantir.abi.checker.datamodel.Artifact;
 import com.palantir.abi.checker.datamodel.ArtifactName;
@@ -48,6 +49,7 @@ import java.util.stream.Stream;
 import javax.tools.JavaFileObject;
 import javax.tools.JavaFileObject.Kind;
 import javax.tools.StandardLocation;
+import org.junit.jupiter.api.io.CleanupMode;
 import org.junit.jupiter.api.io.TempDir;
 
 abstract class BaseConflictCheckerIntegrationTest {
@@ -63,7 +65,7 @@ abstract class BaseConflictCheckerIntegrationTest {
      * If you want to manually inspect the class files, you can remove the TempDir annotation and set it to e.g.
      *   Paths.get("build/tmp/abi-checker-test").
      */
-    @TempDir
+    @TempDir(cleanup = CleanupMode.ON_SUCCESS)
     public Path tempDir;
 
     protected static JavaFileObject file(String className, String source) {
@@ -84,6 +86,8 @@ abstract class BaseConflictCheckerIntegrationTest {
      * The class files will be copied in the provided directory, each under their respective subdirectory.
      */
     protected static void generateClassFiles(Path baseDir, JavaFiles sourceFiles) {
+        System.out.println("Generating class files to " + baseDir);
+
         Compiler compiler = Compiler.javac();
 
         // Compile the dependency sources first, against the old transitive sources.
@@ -164,6 +168,10 @@ abstract class BaseConflictCheckerIntegrationTest {
         }
     }
 
+    protected static ImmutableConflictCheckerConfiguration.Builder config() {
+        return ConflictCheckerConfiguration.builder().addErrorArtifactPrefixes(DEPENDENCY);
+    }
+
     /**
      * Checks for conflicts for classes previously generated in baseDir by calling {@link #generateClassFiles}.
      *
@@ -173,6 +181,12 @@ abstract class BaseConflictCheckerIntegrationTest {
      *   - the {@link #TRANSITIVE} directory's classes as the transitive dependency, which might have conflicts
      */
     protected static List<Conflict> checkConflicts(Path baseDir) {
+        ConflictCheckerConfiguration configuration = config().build();
+
+        return checkConflicts(baseDir, configuration);
+    }
+
+    protected static List<Conflict> checkConflicts(Path baseDir, ConflictCheckerConfiguration configuration) {
         Artifact root = loadArtifact(baseDir, ROOT);
         Artifact dependency = loadArtifact(baseDir, DEPENDENCY);
         Artifact transitive = loadArtifact(baseDir, TRANSITIVE);
@@ -182,10 +196,6 @@ abstract class BaseConflictCheckerIntegrationTest {
         artifacts.add(root);
         artifacts.add(dependency);
         artifacts.add(transitive);
-
-        ConflictCheckerConfiguration configuration = ConflictCheckerConfiguration.builder()
-                .addErrorArtifactPrefixes(DEPENDENCY)
-                .build();
 
         // Use new loaders to avoid any caching between tests
         return ConflictChecker.checkWithEntryPoints(

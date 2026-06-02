@@ -1,0 +1,44 @@
+/*
+ * (c) Copyright 2026 Palantir Technologies Inc. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.palantir.abi.checker.datamodel.conflict;
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.palantir.abi.checker.datamodel.method.CallSite;
+import com.palantir.abi.checker.datamodel.method.DeclaredMethod;
+import com.palantir.abi.checker.datamodel.reference.ClassReference;
+import com.palantir.abi.checker.datamodel.types.ClassTypeDescriptor;
+import java.util.List;
+import org.immutables.value.Value;
+
+/**
+ * Represents a dependency between a method and a class it directly references (e.g. in caught exceptions),
+ * used in Conflict when reporting problems.
+ */
+@Value.Immutable
+@JsonSerialize(as = ImmutableClassDependency.class)
+public interface ClassDependency extends Dependency {
+
+    static ClassDependency of(
+            DeclaredMethod method, CallSite<ClassReference> targetClass, List<ClassTypeDescriptor> reachabilityPath) {
+        return ImmutableClassDependency.builder()
+                .reachabilityPath(reachabilityPath)
+                .fromMethod(method.reference())
+                .fromLineNumber(targetClass.lineNumber())
+                .targetClass(targetClass.owner())
+                .build();
+    }
+}

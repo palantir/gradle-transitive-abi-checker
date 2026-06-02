@@ -23,7 +23,7 @@ import com.palantir.abi.checker.datamodel.field.FieldReference;
 import com.palantir.abi.checker.datamodel.method.CallSite;
 import com.palantir.abi.checker.datamodel.method.DeclaredMethod;
 import com.palantir.abi.checker.datamodel.method.MethodReference;
-import com.palantir.abi.checker.datamodel.method.Reference;
+import com.palantir.abi.checker.datamodel.reference.MemberReference;
 import com.palantir.abi.checker.datamodel.types.ClassTypeDescriptor;
 import com.palantir.abi.checker.util.Constants;
 import java.util.ArrayDeque;
@@ -121,7 +121,7 @@ public final class ClassGraph {
      * Resolves a class's member (method or field) to its actual class' reference, by walking up the class hierarchy as
      *   needed.
      */
-    private <T extends Reference> Optional<T> resolveMember(
+    private <T extends MemberReference> Optional<T> resolveMember(
             DeclaredClass targetClass, T targetMember, BiFunction<DeclaredClass, T, T> memberResolver) {
         // Note that the member here might actually have a different class than the original target from
         final T member = memberResolver.apply(targetClass, targetMember);
@@ -204,7 +204,11 @@ public final class ClassGraph {
 
             enqueueKnownClasses.accept(declaredClass.loadedClasses().stream());
 
-            // TODO(aldexis): what about method return type / parameters? caught exceptions? declared fields?
+            // TODO(aldexis): what about method return type / parameters? declared fields? Direct class reference?
+            enqueueKnownClasses.accept(declaredClass.methods().values().stream()
+                    .flatMap(declaredMethod -> declaredMethod.caughtExceptions().stream())
+                    .map(CallSite::owner));
+
             enqueueKnownClasses.accept(declaredClass.methods().values().stream()
                     .flatMap(declaredMethod -> declaredMethod.methodCalls().stream())
                     .map(CallSite::owner));

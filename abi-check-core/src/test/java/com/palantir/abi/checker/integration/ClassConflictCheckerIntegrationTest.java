@@ -19,10 +19,13 @@ package com.palantir.abi.checker.integration;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+import com.palantir.abi.checker.ConflictCheckerConfiguration;
 import com.palantir.abi.checker.datamodel.conflict.Conflict;
 import com.palantir.abi.checker.datamodel.conflict.Conflict.ConflictCategory;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -72,47 +75,6 @@ public class ClassConflictCheckerIntegrationTest extends BaseConflictCheckerInte
                 .havingCause()
                 .isInstanceOf(NoClassDefFoundError.class)
                 .withMessageContaining("com/ClassWithAbiBreak");
-    }
-
-    @Test
-    public void try_catch_can_ignore_conflict() {
-        JavaFiles.Builder sources = JavaFiles.builder();
-        sources.reachableDependency(
-                "com.BreakingClass",
-                // language=java
-                """
-                package com;
-                public class BreakingClass {
-                    public ClassWithAbiBreak field;
-                    public BreakingClass() {
-                        try {
-                            field = new ClassWithAbiBreak();
-                        } catch (NoClassDefFoundError e) {
-                            // ignore
-                        }
-                    }
-                }
-                """);
-
-        sources.transitiveBeforeDependency(
-                "com.ClassWithAbiBreak",
-                // language=java
-                """
-                package com;
-                public class ClassWithAbiBreak {}
-                """);
-
-        sources.transitiveAfterDependency(
-                "com.RenamedClassWithAbiBreak",
-                // language=java
-                """
-                package com;
-                public class RenamedClassWithAbiBreak {}
-                """);
-
-        generateClassFiles(tempDir, sources.build());
-
-        assertNoConflicts(tempDir);
     }
 
     @Test
@@ -190,5 +152,125 @@ public class ClassConflictCheckerIntegrationTest extends BaseConflictCheckerInte
         generateClassFiles(tempDir, sources.build());
 
         assertNoConflicts(tempDir);
+    }
+
+    @Test
+    public void removed_caught_exception_creates_conflicts() {
+        JavaFiles.Builder sources = JavaFiles.builder();
+        sources.reachableDependency(
+                "com.BreakingClass",
+                // language=java
+                """
+                package com;
+                public class BreakingClass {
+                    public void method() {
+                        try {
+                            // This statement is purely here to avoid the entire block being removed by the compiler
+                            System.out.println("test");
+                        } catch (RemovedException e) {
+                            // ignore
+                        } catch (KeptException e) {
+                            // ignore
+                        } catch (RemovedException2 e) {
+                            // ignore
+                        }
+                    }
+                }
+                """);
+
+        sources.transitiveDependency(
+                "com.KeptException",
+                // language=java
+                """
+                package com;
+                public class KeptException extends RuntimeException {}
+                """);
+
+        sources.transitiveBeforeDependency(
+                "com.RemovedException",
+                // language=java
+                """
+                package com;
+                public class RemovedException extends RuntimeException {}
+                """);
+
+        sources.transitiveBeforeDependency(
+                "com.RemovedException2",
+                // language=java
+                """
+                package com;
+                public class RemovedException2 extends RuntimeException {}
+                """);
+
+        generateClassFiles(tempDir, sources.build());
+
+        assertThatExceptionOfType(InvocationTargetException.class)
+                .isThrownBy(() -> runClassFiles(tempDir))
+                .havingCause()
+                .isInstanceOf(NoClassDefFoundError.class)
+                .withMessageContaining("com/RemovedException");
+
+        // Sort conflicts by target class name, to avoid flakes
+        List<Conflict> conflicts = checkConflicts(tempDir).stream()
+                .sorted(Comparator.comparing(c -> c.dependency().targetClass().className()))
+                .collect(Collectors.toList());
+
+        assertThat(conflicts).hasSize(2);
+
+        Conflict conflict = conflicts.get(0);
+        assertThat(conflict.category()).isEqualTo(ConflictCategory.CLASS_NOT_FOUND);
+        assertThat(conflict.dependency().targetClass().className()).isEqualTo("com.RemovedException");
+        // Verify the line number matches the one from the source code
+        assertThat(conflict.dependency().fromLineNumber()).isEqualTo(7);
+
+        Conflict conflict2 = conflicts.get(1);
+        assertThat(conflict2.category()).isEqualTo(ConflictCategory.CLASS_NOT_FOUND);
+        assertThat(conflict2.dependency().targetClass().className()).isEqualTo("com.RemovedException2");
+        // Verify the line number matches the one from the source code
+        assertThat(conflict2.dependency().fromLineNumber()).isEqualTo(11);
+    }
+
+    @Test
+    public void removed_caught_exception_creates_no_conflict_if_ignored() {
+        JavaFiles.Builder sources = JavaFiles.builder();
+        sources.reachableDependency(
+                "com.BreakingClass",
+                // language=java
+                """
+                package com;
+                public class BreakingClass {
+                    public void method() {
+                        try {
+                            // This statement is purely here to avoid the entire block being removed by the compiler
+                            System.out.println("test");
+                        } catch (RemovedException e) {
+                            // ignore
+                        }
+                    }
+                }
+                """);
+
+        sources.transitiveBeforeDependency(
+                "com.RemovedException",
+                // language=java
+                """
+                package com;
+                public class RemovedException extends RuntimeException {}
+                """);
+
+        generateClassFiles(tempDir, sources.build());
+
+        assertThatExceptionOfType(InvocationTargetException.class)
+                .isThrownBy(() -> runClassFiles(tempDir))
+                .havingCause()
+                .isInstanceOf(NoClassDefFoundError.class)
+                .withMessageContaining("com/RemovedException");
+
+        ConflictCheckerConfiguration configuration =
+                config().addIgnoredClassPrefixes("com.RemovedException").build();
+
+        List<Conflict> conflicts = checkConflicts(tempDir, configuration);
+
+        assertThat(conflicts).hasSize(0);
     }
 }

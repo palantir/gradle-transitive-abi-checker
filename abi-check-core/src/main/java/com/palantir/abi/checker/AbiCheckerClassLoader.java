@@ -43,6 +43,7 @@ import com.palantir.abi.checker.datamodel.method.CallSite;
 import com.palantir.abi.checker.datamodel.method.DeclaredMethod;
 import com.palantir.abi.checker.datamodel.method.MethodDescriptor;
 import com.palantir.abi.checker.datamodel.method.MethodReference;
+import com.palantir.abi.checker.datamodel.reference.ClassReference;
 import com.palantir.abi.checker.datamodel.types.ClassTypeDescriptor;
 import com.palantir.abi.checker.datamodel.types.TypeDescriptors;
 import java.io.IOException;
@@ -63,7 +64,6 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.FieldNode;
-import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InvokeDynamicInsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.LineNumberNode;
@@ -167,17 +167,11 @@ public final class AbiCheckerClassLoader {
                 }
                 if (insn instanceof MethodInsnNode methodInsn) {
                     handleMethodCall(
-                            methodCalls,
-                            lineNumber,
-                            methodInsn,
-                            () -> getCaughtExceptions(method.instructions, methodInsn, method));
+                            methodCalls, lineNumber, methodInsn, () -> getCaughtExceptions(method, methodInsn));
                 }
                 if (insn instanceof FieldInsnNode fieldInsn) {
                     handleFieldAccess(
-                            fieldAccesses,
-                            lineNumber,
-                            fieldInsn,
-                            () -> getCaughtExceptions(method.instructions, fieldInsn, method));
+                            fieldAccesses, lineNumber, fieldInsn, () -> getCaughtExceptions(method, fieldInsn));
                 }
                 if (insn instanceof InvokeDynamicInsnNode dynamicInsn) {
                     handleInvokeDynamic(
@@ -185,7 +179,7 @@ public final class AbiCheckerClassLoader {
                             fieldAccesses,
                             lineNumber,
                             dynamicInsn,
-                            () -> getCaughtExceptions(method.instructions, dynamicInsn, method));
+                            () -> getCaughtExceptions(method, dynamicInsn));
                 }
                 if (insn instanceof LdcInsnNode ldcInsnNode) {
                     handleLdc(loadedClasses, ldcInsnNode);
@@ -196,10 +190,13 @@ public final class AbiCheckerClassLoader {
             }
         }
 
+        Set<CallSite<ClassReference>> allCaughtExceptions = getCaughtExceptions(method);
+
         boolean isStatic = (method.access & Opcodes.ACC_STATIC) != 0;
         MethodDescriptor methodDescriptor = MethodDescriptor.ofDescriptor(method.desc, method.name);
         final DeclaredMethod declaredMethod = DeclaredMethod.builder()
                 .reference(MethodReference.of(className, methodDescriptor, isStatic))
+                .caughtExceptions(allCaughtExceptions)
                 .methodCalls(methodCalls)
                 .fieldAccesses(fieldAccesses)
                 .build();
@@ -210,17 +207,39 @@ public final class AbiCheckerClassLoader {
         }
     }
 
-    private static Set<ClassTypeDescriptor> getCaughtExceptions(
-            final InsnList instructions, final AbstractInsnNode insn, final MethodNode method) {
+    private static Set<CallSite<ClassReference>> getCaughtExceptions(final MethodNode method) {
+        final Set<CallSite<ClassReference>> caughtExceptions = new HashSet<>();
 
-        final Set<ClassTypeDescriptor> caughtExceptions = new HashSet<>();
-        final int instructionIndex = instructions.indexOf(insn);
         for (final TryCatchBlockNode tryCatchBlockNode : method.tryCatchBlocks) {
             if (tryCatchBlockNode.type == null) {
                 continue;
             }
-            final int catchStartIndex = instructions.indexOf(tryCatchBlockNode.start);
-            final int catchEndIndex = instructions.indexOf(tryCatchBlockNode.end);
+            ClassTypeDescriptor exception = TypeDescriptors.fromClassName(tryCatchBlockNode.type);
+
+            final int labelNodeIndex = method.instructions.indexOf(tryCatchBlockNode.handler);
+            int lineNumber = 0;
+            if (labelNodeIndex + 1 < method.instructions.size()) {
+                AbstractInsnNode abstractInsnNode = method.instructions.get(labelNodeIndex + 1);
+                if (abstractInsnNode instanceof LineNumberNode lineNumberNode) {
+                    lineNumber = lineNumberNode.line;
+                }
+            }
+            caughtExceptions.add(CallSite.of(ClassReference.of(exception), lineNumber));
+        }
+
+        return caughtExceptions;
+    }
+
+    private static Set<ClassTypeDescriptor> getCaughtExceptions(final MethodNode method, final AbstractInsnNode insn) {
+
+        final Set<ClassTypeDescriptor> caughtExceptions = new HashSet<>();
+        final int instructionIndex = method.instructions.indexOf(insn);
+        for (final TryCatchBlockNode tryCatchBlockNode : method.tryCatchBlocks) {
+            if (tryCatchBlockNode.type == null) {
+                continue;
+            }
+            final int catchStartIndex = method.instructions.indexOf(tryCatchBlockNode.start);
+            final int catchEndIndex = method.instructions.indexOf(tryCatchBlockNode.end);
             if (instructionIndex > catchStartIndex && instructionIndex < catchEndIndex) {
                 caughtExceptions.add(TypeDescriptors.fromClassName(tryCatchBlockNode.type));
             }

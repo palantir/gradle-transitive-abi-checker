@@ -117,6 +117,10 @@ interface JavaFiles {
             return addAllUnreachableDependencySources(Set.of(reachableDependencySources));
         }
 
+        Builder transitiveDependency(String className, String source) {
+            return transitiveBeforeDependency(className, source).transitiveAfterDependency(className, source);
+        }
+
         Builder transitiveBeforeDependency(String className, String source) {
             return addAllTransitiveBeforeDependencies(file(className, source));
         }

@@ -33,6 +33,7 @@
 package com.palantir.abi.checker.datamodel.method;
 
 import com.palantir.abi.checker.datamodel.field.FieldReference;
+import com.palantir.abi.checker.datamodel.reference.ClassReference;
 import java.util.Set;
 import org.immutables.value.Value;
 
@@ -43,6 +44,16 @@ import org.immutables.value.Value;
 @Value.Immutable
 public interface DeclaredMethod {
     MethodReference reference();
+
+    /**
+     * Exceptions caught by this method. These trigger NoClassDefFoundError
+     * at Class verification time if not found (i.e. even if the method itself is unused).
+     *
+     * See https://docs.oracle.com/javase/specs/jvms/se23/html/jvms-4.html#jvms-4.9.2
+     * "Each class mentioned in a catch_type item of the exception_table array of the method's
+     * Code_attribute structure must be Throwable or a subclass of Throwable."
+     */
+    Set<CallSite<ClassReference>> caughtExceptions();
 
     /** Calls that this method makes to other methods. */
     Set<CallSite<MethodReference>> methodCalls();

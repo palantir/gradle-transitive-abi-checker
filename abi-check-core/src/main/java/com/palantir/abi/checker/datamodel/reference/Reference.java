@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2025 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2026 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-package com.palantir.abi.checker.datamodel.method;
+package com.palantir.abi.checker.datamodel.reference;
 
 import com.palantir.abi.checker.datamodel.types.ClassTypeDescriptor;
 
 public interface Reference {
     ClassTypeDescriptor clazz();
-
-    boolean isStatic();
 }

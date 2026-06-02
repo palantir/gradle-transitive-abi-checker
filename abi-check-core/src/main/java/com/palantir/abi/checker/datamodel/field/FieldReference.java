@@ -17,14 +17,15 @@
 package com.palantir.abi.checker.datamodel.field;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.palantir.abi.checker.datamodel.method.Reference;
+import com.palantir.abi.checker.datamodel.reference.MemberReference;
 import com.palantir.abi.checker.datamodel.types.ClassTypeDescriptor;
 import com.palantir.abi.checker.datamodel.types.TypeDescriptor;
 
 /**
  * Represents a reference to a specific field in a given class.
  */
-public record FieldReference(ClassTypeDescriptor clazz, FieldDescriptor field, boolean isStatic) implements Reference {
+public record FieldReference(ClassTypeDescriptor clazz, FieldDescriptor field, boolean isStatic)
+        implements MemberReference {
 
     public TypeDescriptor type() {
         return field.type();
