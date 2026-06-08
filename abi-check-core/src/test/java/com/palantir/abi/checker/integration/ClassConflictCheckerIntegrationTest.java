@@ -223,13 +223,13 @@ public class ClassConflictCheckerIntegrationTest extends BaseConflictCheckerInte
         assertThat(conflict.category()).isEqualTo(ConflictCategory.CLASS_NOT_FOUND);
         assertThat(conflict.dependency().targetClass().className()).isEqualTo("com.RemovedException");
         // Verify the line number matches the one from the source code
-        assertThat(conflict.dependency().fromLineNumber()).isEqualTo(7);
+        assertThat(conflict.dependency().fromLineNumber()).isEqualTo(8);
 
         Conflict conflict2 = conflicts.get(1);
         assertThat(conflict2.category()).isEqualTo(ConflictCategory.CLASS_NOT_FOUND);
         assertThat(conflict2.dependency().targetClass().className()).isEqualTo("com.RemovedException2");
         // Verify the line number matches the one from the source code
-        assertThat(conflict2.dependency().fromLineNumber()).isEqualTo(11);
+        assertThat(conflict2.dependency().fromLineNumber()).isEqualTo(12);
     }
 
     @Test
