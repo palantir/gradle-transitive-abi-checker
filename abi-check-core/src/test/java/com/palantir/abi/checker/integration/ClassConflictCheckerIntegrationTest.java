@@ -22,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import com.palantir.abi.checker.ConflictCheckerConfiguration;
 import com.palantir.abi.checker.datamodel.conflict.Conflict;
 import com.palantir.abi.checker.datamodel.conflict.Conflict.ConflictCategory;
+import com.palantir.abi.checker.datamodel.conflict.MethodDependency;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Comparator;
 import java.util.List;
@@ -163,6 +164,7 @@ public class ClassConflictCheckerIntegrationTest extends BaseConflictCheckerInte
                 """
                 package com;
                 public class BreakingClass {
+                    // Note: the method here is unused at runtime, but this still breaks upon class verification
                     public void method() {
                         try {
                             // This statement is purely here to avoid the entire block being removed by the compiler
@@ -221,13 +223,13 @@ public class ClassConflictCheckerIntegrationTest extends BaseConflictCheckerInte
         assertThat(conflict.category()).isEqualTo(ConflictCategory.CLASS_NOT_FOUND);
         assertThat(conflict.dependency().targetClass().className()).isEqualTo("com.RemovedException");
         // Verify the line number matches the one from the source code
-        assertThat(conflict.dependency().fromLineNumber()).isEqualTo(7);
+        assertThat(conflict.dependency().fromLineNumber()).isEqualTo(8);
 
         Conflict conflict2 = conflicts.get(1);
         assertThat(conflict2.category()).isEqualTo(ConflictCategory.CLASS_NOT_FOUND);
         assertThat(conflict2.dependency().targetClass().className()).isEqualTo("com.RemovedException2");
         // Verify the line number matches the one from the source code
-        assertThat(conflict2.dependency().fromLineNumber()).isEqualTo(11);
+        assertThat(conflict2.dependency().fromLineNumber()).isEqualTo(12);
     }
 
     @Test
@@ -239,6 +241,7 @@ public class ClassConflictCheckerIntegrationTest extends BaseConflictCheckerInte
                 """
                 package com;
                 public class BreakingClass {
+                    // Note: the method here is unused at runtime, but this still breaks upon class verification
                     public void method() {
                         try {
                             // This statement is purely here to avoid the entire block being removed by the compiler
@@ -272,5 +275,93 @@ public class ClassConflictCheckerIntegrationTest extends BaseConflictCheckerInte
         List<Conflict> conflicts = checkConflicts(tempDir, configuration);
 
         assertThat(conflicts).hasSize(0);
+    }
+
+    @Test
+    public void moving_inner_class_to_parent_conflicts() {
+        JavaFiles.Builder sources = JavaFiles.builder();
+        sources.reachableDependency(
+                "com.BreakingClass",
+                // language=java
+                """
+                package com;
+                public class BreakingClass {
+                    public BreakingClass() {
+                        new ChildClass().method(new ChildClass.InnerClass());
+                    }
+                }
+                """);
+
+        sources.transitiveBeforeDependency(
+                "com.ChildClass",
+                // language=java
+                """
+                package com;
+                public class ChildClass extends ParentClass {
+                    public ChildClass() {}
+
+                    public static class InnerClass {}
+
+                    public void method(ChildClass.InnerClass clazz) {}
+                }
+                """);
+
+        sources.transitiveBeforeDependency(
+                "com.ParentClass",
+                // language=java
+                """
+                package com;
+                public class ParentClass {}
+                """);
+
+        sources.transitiveAfterDependency(
+                "com.ChildClass",
+                // language=java
+                """
+                package com;
+                public class ChildClass extends ParentClass {
+                    public ChildClass() {}
+
+                    public void method(ParentClass.InnerClass clazz) {}
+                }
+                """);
+
+        sources.transitiveAfterDependency(
+                "com.ParentClass",
+                // language=java
+                """
+                package com;
+                public class ParentClass {
+                    public static class InnerClass {}
+                }
+                """);
+
+        generateClassFiles(tempDir, sources.build());
+
+        assertThatExceptionOfType(InvocationTargetException.class)
+                .isThrownBy(() -> runClassFiles(tempDir))
+                .havingCause()
+                .isInstanceOf(NoClassDefFoundError.class)
+                .withMessageContaining("com/ChildClass$InnerClass");
+
+        List<Conflict> conflicts = checkConflicts(tempDir);
+
+        assertThat(conflicts).hasSize(2);
+
+        assertThat(conflicts).anySatisfy(c -> {
+            assertThat(c.category()).isEqualTo(ConflictCategory.METHOD_SIGNATURE_NOT_FOUND);
+            assertThat(c.dependency()).isInstanceOf(MethodDependency.class);
+            MethodDependency methodDependency = (MethodDependency) c.dependency();
+            assertThat(methodDependency.fromClass().className()).isEqualTo("com.BreakingClass");
+            assertThat(methodDependency.fromMethod().method()).isEqualTo(voidMethod("<init>"));
+            assertThat(methodDependency.targetClass().className()).isEqualTo("com.ChildClass");
+            assertThat(methodDependency.targetMethod().method())
+                    .isEqualTo(voidMethod("method", "Lcom/ChildClass$InnerClass;"));
+        });
+
+        assertThat(conflicts).anySatisfy(c -> {
+            assertThat(c.category()).isEqualTo(ConflictCategory.CLASS_NOT_FOUND);
+            assertThat(c.dependency().targetClass().className()).isEqualTo("com.ChildClass$InnerClass");
+        });
     }
 }

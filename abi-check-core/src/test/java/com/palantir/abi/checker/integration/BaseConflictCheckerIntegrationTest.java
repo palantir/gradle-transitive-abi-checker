@@ -256,9 +256,9 @@ abstract class BaseConflictCheckerIntegrationTest {
     }
 
     protected void assertNoConflicts(Path baseDir) {
+        assertThatNoException().isThrownBy(() -> runClassFiles(baseDir));
+
         List<Conflict> conflicts = checkConflicts(baseDir);
         assertThat(conflicts).isEmpty();
-
-        assertThatNoException().isThrownBy(() -> runClassFiles(baseDir));
     }
 }
