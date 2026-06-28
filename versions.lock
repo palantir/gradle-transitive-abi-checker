@@ -74,9 +74,9 @@ org.jetbrains:annotations:26.1.0 (1 constraints: d81910df)
 
 org.junit:junit-bom:6.1.1 (1 constraints: 0a050d36)
 
-org.junit.jupiter:junit-jupiter:6.1.1 (2 constraints: 56105ad1)
+org.junit.jupiter:junit-jupiter:6.1.1 (2 constraints: 571078d1)
 
-org.junit.jupiter:junit-jupiter-api:6.1.1 (7 constraints: 106eb840)
+org.junit.jupiter:junit-jupiter-api:6.1.1 (7 constraints: 116ee141)
 
 org.junit.jupiter:junit-jupiter-engine:6.1.1 (2 constraints: 1317983b)
 
