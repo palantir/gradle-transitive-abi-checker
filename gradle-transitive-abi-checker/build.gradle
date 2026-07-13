@@ -16,6 +16,8 @@ dependencies {
 
     testImplementation gradleTestKit()
     testImplementation 'com.netflix.nebula:nebula-test'
+    testImplementation 'org.spockframework:spock-core'
+    testImplementation 'org.spockframework:spock-junit4'
 }
 
 
