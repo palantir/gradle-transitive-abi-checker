@@ -1,6 +1,0 @@
-type: improvement
-improvement:
-  description: Provide hint in output when conflict targetClass and fromClass are
-    the same
-  links:
-  - https://github.com/palantir/gradle-transitive-abi-checker/pull/14
