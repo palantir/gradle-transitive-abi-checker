@@ -27,6 +27,8 @@ import org.gradle.api.tasks.InputDirectory;
 import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.Optional;
+import org.gradle.api.tasks.PathSensitive;
+import org.gradle.api.tasks.PathSensitivity;
 
 /**
  * This type represents a resolved artifact (typically from the runtime classpath).
@@ -39,10 +41,12 @@ public interface ResolvedArtifactDefinition {
 
     @Optional
     @InputDirectory
+    @PathSensitive(PathSensitivity.ABSOLUTE)
     DirectoryProperty getArtifactClassesPath();
 
     @Optional
     @InputFile
+    @PathSensitive(PathSensitivity.ABSOLUTE)
     RegularFileProperty getArtifactJarPath();
 
     @Internal

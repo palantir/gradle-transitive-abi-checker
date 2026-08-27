@@ -53,9 +53,13 @@ import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.OutputFile;
+import org.gradle.api.tasks.PathSensitive;
+import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.api.tasks.TaskAction;
+import org.gradle.work.DisableCachingByDefault;
 import org.slf4j.Logger;
 
+@DisableCachingByDefault(because = "Not opting into build caching; explicit opt-out is required by Gradle 9.7")
 public abstract class TransitiveAbiCheckerTask extends DefaultTask {
     private static final Logger log = Logging.getLogger(TransitiveAbiCheckerTask.class);
     private static final ObjectMapper MAPPER = JsonMapper.builder().build();
@@ -67,6 +71,7 @@ public abstract class TransitiveAbiCheckerTask extends DefaultTask {
      * The class files of the project being checked.
      */
     @InputFiles
+    @PathSensitive(PathSensitivity.ABSOLUTE)
     public abstract ConfigurableFileCollection getProjectClassFiles();
 
     /**
