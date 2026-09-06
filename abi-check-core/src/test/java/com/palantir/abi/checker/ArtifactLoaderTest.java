@@ -107,7 +107,6 @@ public class ArtifactLoaderTest {
     }
 
     // This is used implicitly in a test
-    @SuppressWarnings("unused")
     private static final class ExampleClassWithInterfaces implements Serializable, Cloneable {
         // no fields needed, used by testTypeOfClassParentsWhenInterfaces above
     }
