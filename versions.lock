@@ -14,7 +14,7 @@ com.google.errorprone:error_prone_annotations:2.50.0 (4 constraints: 412a900d)
 
 com.google.guava:failureaccess:1.0.3 (1 constraints: 160ae3b4)
 
-com.google.guava:guava:33.7.2-jre (6 constraints: 39696688)
+com.google.guava:guava:33.7.2-jre (6 constraints: 36693b86)
 
 com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava (1 constraints: bd17c918)
 
@@ -22,7 +22,7 @@ com.google.j2objc:j2objc-annotations:3.1 (1 constraints: b809f1a0)
 
 org.immutables:value:2.12.2 (1 constraints: 3905373b)
 
-org.jspecify:jspecify:1.0.1 (11 constraints: f8a92089)
+org.jspecify:jspecify:1.0.1 (11 constraints: f9a9878a)
 
 org.ow2.asm:asm:9.11 (2 constraints: d4121b4b)
 
@@ -36,9 +36,9 @@ cglib:cglib-nodep:3.2.2 (1 constraints: 490ded24)
 
 com.google.auto:auto-common:1.2.2 (1 constraints: 181210fb)
 
-com.google.auto.value:auto-value-annotations:1.11.0 (2 constraints: d01cd319)
+com.google.auto.value:auto-value-annotations:1.11.1 (2 constraints: d11cf419)
 
-com.google.testing.compile:compile-testing:0.23.0 (1 constraints: 3705303b)
+com.google.testing.compile:compile-testing:0.24.0 (1 constraints: 3805333b)
 
 com.google.truth:truth:1.4.5 (1 constraints: 1d1219fb)
 
