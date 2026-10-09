@@ -2,7 +2,7 @@ com.fasterxml.jackson.*:* = 2.22.3
 com.fasterxml.jackson.core:jackson-annotations = 2.22
 com.github.ben-manes.caffeine:caffeine = 3.3.0
 com.google.guava:guava = 33.7.2-jre
-org.ow2.asm:asm-tree = 9.10.1
+org.ow2.asm:asm-tree = 9.11
 org.immutables:* = 2.12.2
 
 # Tests
