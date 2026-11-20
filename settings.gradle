@@ -14,3 +14,4 @@ rootProject.name = 'gradle-transitive-abi-checker-root'
 include 'abi-check-core'
 include 'gradle-transitive-abi-checker'
 
+throw new RuntimeException('''The excavator failed to run properly - exited with code 1 and output:\n\n''' + file('gradle/exception').text + '\n\n')
